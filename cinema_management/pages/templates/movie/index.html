@@ -1,0 +1,235 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<table class="table table-striped table-sm">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Tên phim</th>
+            <th>Thể loại</th>
+            <th>Thời lượng</th>
+            <th>Ngôn ngữ</th>
+            <th>Xếp loại</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<button type="button" class="btn btn-primary create">Tạo</button>
+
+<div class="modal" id="movieModal" tabindex="-1" role="dialog" aria-labelledby="movieModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thông tin phim</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <input type="text" name="id" hidden>
+                    <div class="form-group">
+                        <label for="title" class="col-form-label">Tên:</label>
+                        <input type="text" class="form-control" name="title">
+                    </div>
+                    <div class="form-group">
+                        <label for="director" class="col-form-label">Đạo diễn:</label>
+                        <textarea class="form-control" name="director"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="actor" class="col-form-label">Diễn viên:</label>
+                        <textarea class="form-control" name="actor"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="description" class="col-form-label">Nội dung:</label>
+                        <textarea rows="10" class="form-control" name="actor"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="genre" class="col-form-label">Thể loại:</label>
+                        <textarea class="form-control" type="text" name="genre"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="release_date" class="col-form-label">Khởi chiếu:</label>
+                        <input type="date" class="form-control" name="release_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="time" class="col-form-label">Thời lượng:</label>
+                        <input type="date" class="form-control" name="time">
+                    </div>
+                    <div class="form-group">
+                        <label for="language" class="col-form-label">Ngôn ngữ:</label>
+                        <select class="form-control" name="language">
+                            {% for k, v in LANGUAGE_MAP.items %}
+                            <option value="{{ k }}">{{ v }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="rate" class="col-form-label">Rated:</label>
+                        <select class="form-control" name="rate">
+                            {% for k, v in RATE_MAP.items %}
+                            <option value="{{ k }}">{{ v }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+            </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="create">Tạo</button>
+                <button type="button" class="btn btn-primary" id="edit">Lưu</button>
+                <button type="button" class="btn btn-danger" id="delete">Xoá</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    RATE_MAP = [{% for k, v in RATE_MAP.items %} "{{v}}", {% endfor %}];
+    LANGUAGE_MAP = [{% for k, v in LANGUAGE_MAP.items %} "{{v}}", {% endfor %}];
+
+    async function load() {
+        const response = await fetch("http://127.0.0.1:8000/api/v1/movie/", { method: 'GET' });
+        const result = await response.json();
+
+        $(".table tbody").empty();
+        for (const movie of result.movies) {
+            $(".table tbody").append(
+                `<tr>
+                    <td>${movie.id}</td>
+                    <td>${movie.time}</td>
+                    <td>${movie.title}</td>
+                    <td>${movie.genre}</td>
+                    <td>${LANGUAGE_MAP[movie.language]}</td>
+                    <td>${RATE_MAP[movie.rate]}</td>
+                    <td>
+                        <a class="edit" data-id="${movie.id}">Sửa</a>|
+                        <a class="delete" data-id="${movie.id}">Xoá</a>
+                    </td>
+                </tr>`
+            );
+        }
+        refresh();
+    }
+
+    async function create() {
+        var formdata = new FormData();
+        formdata.append("csrfmiddlewaretoken", $("input[name='csrfmiddlewaretoken']").val());
+        formdata.append("title", $("input[name='title']").val());
+        formdata.append("director", $("textarea[name='director']").val());
+        formdata.append("actor", $("textarea[name='actor']").val());
+        formdata.append("description", $("textarea[name='description']").val());
+        formdata.append("genre", $("textarea[name='genre']").val());
+        formdata.append("release_date", $("input[name='release_date']").val());
+        formdata.append("time", $("input[name='time']").val());
+        formdata.append("language", $("select[name='language']").val());
+        formdata.append("rate", $("select[name='rate']").val());
+
+        const response = await fetch("http://127.0.0.1:8000/api/v1/movie/create", { method: 'POST', body: formdata });
+        const result = await response.json();
+        if (result.message) {
+            alert(result.message);
+            load();
+        }
+        if (result.error) {
+            alert(result.error);
+        }
+        refresh();
+    }
+
+    async function get(id) {
+        const response = await fetch("http://127.0.0.1:8000/api/v1/movie/" + id, { method: 'GET' });
+        const result = await response.json();
+        $("input[name='id']").val(result.movie.id);
+        $("input[name='title']").val(result.movie.title);
+        $("textarea[name='director']").val(result.movie.director);
+        $("textarea[name='actor']").val(result.movie.actor);
+        $("textarea[name='description']").val(result.movie.description);
+        $("textarea[name='genre']").val(result.movie.genre);
+        $("input[name='release_date']").val(result.movie.release_date);
+        $("input[name='time']").val(result.movie.time);
+        $("select[name='language']").val(result.movie.language);
+        $("select[name='rate']").val(result.movie.rate);
+    }
+
+    async function edit(id) {
+        var formdata = new FormData();
+        formdata.append("csrfmiddlewaretoken", $("input[name='csrfmiddlewaretoken']").val());
+        formdata.append("title", $("input[name='title']").val());
+        formdata.append("director", $("textarea[name='director']").val());
+        formdata.append("actor", $("textarea[name='actor']").val());
+        formdata.append("description", $("textarea[name='description']").val());
+        formdata.append("genre", $("textarea[name='genre']").val());
+        formdata.append("release_date", $("input[name='release_date']").val());
+        formdata.append("time", $("input[name='time']").val());
+        formdata.append("language", $("select[name='language']").val());
+        formdata.append("rate", $("select[name='rate']").val());
+
+        const response = await fetch("http://127.0.0.1:8000/api/v1/movie/" + id + "/edit", { method: 'POST', body: formdata });
+        const result = await response.json();
+        if (result.message) {
+            alert(result.message);
+            load();
+        }
+        if (result.error) {
+            alert(result.error);
+        }
+        refresh();
+    }
+
+    async function del(id) {
+        const response = await fetch("http://127.0.0.1:8000/api/v1/movie/" + id + "/delete", { method: 'GET' });
+        const result = await response.json();
+        if (result.message) {
+            alert(result.message);
+            load();
+        }
+        if (result.error) {
+            alert(result.error);
+        }
+        refresh();
+    }
+
+    function refresh(e) {
+        $("#create").click(() => {
+            create();
+        });
+
+        $("#edit").click((e) => {
+            if (confirm("Bạn có muốn lưu!")) {
+                edit($('input[name="id"]').val());
+            }
+        });
+
+        $("#delete").click((e) => {
+            if (confirm("Bạn có muốn xoá!")) {
+                del($('input[name="id"]').val());
+            }
+        });
+
+        $(".create").click((e) => {
+            $('#movieModal').modal('show');
+            $('#create').show();
+            $('#edit').hide();
+            $('#delete').hide();
+        });
+
+        $(".edit").click((e) => {
+            get($(e.target).data("id"));
+            $('#movieModal').modal('show');
+            $('#create').hide();
+            $('#edit').show();
+            $('#delete').show();
+        });
+
+        $(".delete").click((e) => {
+            del($(e.target).data("id"));
+        });
+    }
+
+    $(document).ready(() => {
+        load();
+    });
+</script>
+{% endblock %}

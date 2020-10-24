@@ -1,0 +1,2 @@
+**/*.pyc
+**/migrations/0*.py
