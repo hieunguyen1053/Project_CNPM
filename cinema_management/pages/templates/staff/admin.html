@@ -1,25 +1,23 @@
 {% extends "admin.html" %}
 
 {% block title %}
-<title>Quản lý rạp chiếu</title>
+<title>Quản lý phim</title>
 {% endblock %}
 
 {% block content %}
 <div class="d-float">
-    <span class="float-left">
-        <h2>Quản lý phòng chiếu</h2>
-    </span>
-    <span class="float-right"><button type="button" class="btn btn-primary create"><i
-                class="fas fa-plus"></i></button></span>
+    <span class="float-left"><h2>Quản lý nhân viên</h2></span>
+    <span class="float-right"><button type="button" class="btn btn-primary create"><i class="fas fa-plus"></i></button></span>
 </div>
 <div class="table-responsive">
     <table class="table table-striped table-sm">
         <thead>
             <tr>
                 <th>#</th>
-                <th>Tên phòng</th>
-                <th>Loại phòng</th>
-                <th>Số ghế</th>
+                <th>Username</th>
+                <th>Họ và tên lót</th>
+                <th>Tên</th>
+                <th>Quản trị viên</th>
                 <th>Thao tác</th>
             </tr>
         </thead>
@@ -34,12 +32,11 @@
     </ul>
 </nav>
 
-<div class="modal" id="auditoriumModal" tabindex="-1" role="dialog" aria-labelledby="auditoriumModalLabel"
-    aria-hidden="true">
+<div class="modal" id="staffModal" tabindex="-1" role="dialog" aria-labelledby="schedstaffLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Thông tin phim</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Thông tin lịch chiếu</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -49,28 +46,26 @@
                     {% csrf_token %}
                     <input type="text" name="id" hidden>
                     <div class="form-group">
-                        <label for="name" class="col-form-label">Tên phòng:</label>
-                        <input type="text" class="form-control" name="name">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="customSwitch1" name="is_superuser">
+                            <label class="custom-control-label" for="customSwitch1">Quản trị viên</label>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="type" class="col-form-label">Loại phòng:</label>
-                        <select class="form-control" name="type">
-                            {% for k, v in TYPE_MAP.items %}
-                            <option value="{{ k }}">{{ v }}</option>
-                            {% endfor %}
-                        </select>
+                        <label for="username" class="col-form-label">Username:</label>
+                        <input type="text" class="form-control" name="username">
                     </div>
                     <div class="form-group">
-                        <label for="rows" class="col-form-label">Số hàng:</label>
-                        <input type="number" class="form-control" name="rows" min="5" max="20" step="1">
+                        <label for="last_name" class="col-form-label">Họ và tên lót:</label>
+                        <input type="text" class="form-control" name="last_name">
                     </div>
                     <div class="form-group">
-                        <label for="seats_per_row" class="col-form-label">Số ghế mỗi hàng</label>
-                        <input type="number" class="form-control" name="seats_per_row" min="5" max="20" step="1">
+                        <label for="first_name" class="col-form-label">Tên:</label>
+                        <input type="text" class="form-control" name="first_name">
                     </div>
                     <div class="form-group">
-                        <label for="seats_state" class="col-form-label">Trạng thái:</label>
-                        <input type="text" class="form-control" name="seats_state">
+                        <label for="password" class="col-form-label">Mật khẩu:</label>
+                        <input type="password" class="form-control" name="password">
                     </div>
                 </form>
             </div>
@@ -84,24 +79,23 @@
 </div>
 
 <script>
-    TYPE_MAP = [{% for k, v in TYPE_MAP.items %} "{{v}}", {% endfor %}];
-
     async function load() {
         const page = new URLSearchParams(window.location.search).get("page");
-        const response = await fetch(`/api/v1/auditorium/?page=${page}`, { method: 'GET' });
+        const response = await fetch(`/api/v1/staff/?page=${page}`, { method: 'GET' });
         const result = await response.json();
 
         $(".table tbody").empty();
-        for (const auditorium of result.auditoriums) {
+        for (const staff of result.staffs) {
             $(".table tbody").append(
                 `<tr>
-                    <td>${auditorium.id}</td>
-                    <td>${auditorium.name}</td>
-                    <td>${TYPE_MAP[auditorium.type]}</td>
-                    <td>${auditorium.rows * auditorium.seats_per_row}</td>
+                    <td>${staff.id}</td>
+                    <td>${staff.username}</td>
+                    <td>${staff.last_name}</td>
+                    <td>${staff.first_name}</td>
+                    <td>${staff.is_superuser}</td>
                     <td>
-                        <a class="edit" data-id="${auditorium.id}">Sửa</a>|
-                        <a class="delete" data-id="${auditorium.id}">Xoá</a>
+                        <a class="edit" data-id="${staff.id}">Sửa</a>|
+                        <a class="delete" data-id="${staff.id}">Xoá</a>
                     </td>
                 </tr>`
             );
@@ -115,12 +109,13 @@
     async function create() {
         var formdata = new FormData();
         formdata.append("csrfmiddlewaretoken", $("input[name='csrfmiddlewaretoken']").val());
-        formdata.append("name", $("input[name='name']").val());
-        formdata.append("type", $("select[name='type']").val());
-        formdata.append("rows", $("input[name='rows']").val());
-        formdata.append("seats_per_row", $("input[name='seats_per_row']").val());
+        formdata.append("username", $("input[name='username']").val());
+        formdata.append("password", $("input[name='password']").val());
+        formdata.append("first_name", $("input[name='first_name']").val());
+        formdata.append("last_name", $("input[name='last_name']").val());
+        formdata.append("is_superuser", $("input[name='is_superuser']").is(":checked"));
 
-        const response = await fetch("/api/v1/auditorium/create", { method: 'POST', body: formdata });
+        const response = await fetch("/api/v1/staff/create", { method: 'POST', body: formdata });
         const result = await response.json();
         if (result.message) {
             alert(result.message);
@@ -133,26 +128,28 @@
     }
 
     async function get(id) {
-        const response = await fetch("/api/v1/auditorium/" + id, { method: 'GET' });
+        const response = await fetch("/api/v1/staff/" + id, { method: 'GET' });
         const result = await response.json();
-        $("input[name='id']").val(result.auditorium.id);
-        $("input[name='name']").val(result.auditorium.name);
-        $("select[name='type']").val(result.auditorium.type);
-        $("input[name='rows']").val(result.auditorium.rows);
-        $("input[name='seats_per_row']").val(result.auditorium.seats_per_row);
-        $("input[name='seats_state']").val(result.auditorium.seats_state);
+        $("input[name='id']").val(result.staff.id);
+        if ($("input[name='is_superuser']").is(":checked") != result.staff.is_superuser) {
+            $("input[name='is_superuser']").click();
+        }
+        $("input[name='username']").val(result.staff.username);
+        $("input[name='first_name']").val(result.staff.first_name);
+        $("input[name='last_name']").val(result.staff.last_name);
     }
 
     async function edit(id) {
         var formdata = new FormData();
         formdata.append("csrfmiddlewaretoken", $("input[name='csrfmiddlewaretoken']").val());
-        formdata.append("name", $("input[name='name']").val());
-        formdata.append("type", $("select[name='type']").val());
-        formdata.append("rows", $("input[name='rows']").val());
-        formdata.append("seats_per_row", $("input[name='seats_per_row']").val());
-        formdata.append("seats_state", $("input[name='seats_state']").val());
+        formdata.append("username", $("input[name='username']").val());
+        formdata.append("first_name", $("input[name='first_name']").val());
+        formdata.append("last_name", $("input[name='last_name']").val());
+        formdata.append("is_superuser", $("input[name='is_superuser']").is(":checked"));
+        if ($("input[name='password']").val() != "")
+            formdata.append("password", $("input[name='password']").val());
 
-        const response = await fetch("/api/v1/auditorium/" + id + "/edit", { method: 'POST', body: formdata });
+        const response = await fetch("/api/v1/staff/" + id + "/edit", { method: 'POST', body: formdata });
         const result = await response.json();
         if (result.message) {
             alert(result.message);
@@ -165,7 +162,7 @@
     }
 
     async function del(id) {
-        const response = await fetch("/api/v1/auditorium/" + id + "/delete", { method: 'GET' });
+        const response = await fetch("/api/v1/staff/" + id + "/delete", { method: 'GET' });
         const result = await response.json();
         if (result.message) {
             alert(result.message);
@@ -196,7 +193,7 @@
 
         $(".create").unbind('click').bind('click', (e) => {
             $('.form-control').val("");
-            $('#auditoriumModal').modal('show');
+            $('#staffModal').modal('show');
             $('#create').show();
             $('#edit').hide();
             $('#delete').hide();
@@ -204,7 +201,7 @@
 
         $(".edit").unbind('click').bind('click', (e) => {
             get($(e.target).data("id"));
-            $('#auditoriumModal').modal('show');
+            $('#staffModal').modal('show');
             $('#create').hide();
             $('#edit').show();
             $('#delete').show();
@@ -215,10 +212,11 @@
                 del($(e.target).data("id"));
             }
         });
-        $('#auditoriumModal').modal('hide');
+        $('#staffModal').modal('hide');
     }
 
     $(document).ready(() => {
+
         load();
     });
 </script>

@@ -24,4 +24,6 @@ urlpatterns = [
     path('api/v1/movie/', include('movie.urls')),
     path('api/v1/auditorium/', include('auditorium.urls')),
     path('api/v1/schedule/', include('movie_schedule.urls')),
+    path('api/v1/member/', include('member.urls')),
+    path('api/v1/staff/', include('staff.urls')),
 ] + static(settings.STATIC_URL)

@@ -1,12 +1,25 @@
+from django.core.paginator import Paginator
 from django.http import JsonResponse
+
 from .models import Movie
+
 
 def all(request):
     if request.method == "GET":
         try:
             movies = Movie.objects.all()
-            movies = [movie.serialize() for movie in movies]
-            return JsonResponse({"movies": movies})
+            paginator = Paginator(movies, 20)
+
+            page_number = request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+            paginator = {
+                "number": page_obj.number,
+                "has_previous": page_obj.has_previous(),
+                "num_pages": page_obj.paginator.num_pages,
+                "has_next": page_obj.has_next(),
+            }
+            movies = [movie.serialize() for movie in page_obj]
+            return JsonResponse({"movies": movies, "paginator": paginator})
         except Exception as e:
             return JsonResponse({"error": "Đã có lỗi xảy ra."})
 
@@ -32,8 +45,9 @@ def get(request, id):
     if request.method == "GET":
         try:
             movie = Movie.objects.get(id=id)
+            schedules = movie.get_schedule()
             movie = movie.serialize()
-            return JsonResponse({"movie": movie})
+            return JsonResponse({"movie": movie, "schedules": schedules})
         except Exception as e:
             return JsonResponse({"error": "Đã có lỗi xảy ra."})
 

@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'movie',
     'movie_schedule',
     'staff',
-    'customer',
+    'member',
 ]
 
 MIDDLEWARE = [

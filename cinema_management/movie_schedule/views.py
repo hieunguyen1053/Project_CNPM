@@ -1,4 +1,5 @@
 from auditorium.models import Auditorium
+from django.core.paginator import Paginator
 from django.db.utils import IntegrityError
 from django.http import JsonResponse
 from movie.models import Movie
@@ -10,14 +11,23 @@ def all(request):
     if request.method == "GET":
         try:
             schedules = MovieSchedule.objects.all()
+            paginator = Paginator(schedules, 20)
+
+            page_number = request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+            paginator = {
+                "number": page_obj.number,
+                "has_previous": page_obj.has_previous(),
+                "num_pages": page_obj.paginator.num_pages,
+                "has_next": page_obj.has_next(),
+            }
             schedules = [schedule.serialize() for schedule in schedules]
-            return JsonResponse({"schedules": schedules})
+            return JsonResponse({"schedules": schedules, "paginator": paginator})
         except Exception as e:
             return JsonResponse({"error": "Đã có lỗi xảy ra."})
 
 def create(request):
     if request.method == "POST":
-        print(request.POST)
         try:
             movie = request.POST.get("movie")
             movie = Movie.objects.get(id=movie)
@@ -69,8 +79,8 @@ def edit(request, id):
 def delete(request, id):
     if request.method == "GET":
         try:
-            movie = MovieSchedule.objects.get(id=id)
-            movie.delete()
-            return JsonResponse({"message": "Đã xoá phim thành công."})
+            schedule = MovieSchedule.objects.get(id=id)
+            schedule.delete()
+            return JsonResponse({"message": "Đã xoá lịch chiếu thành công."})
         except Exception as e:
             return JsonResponse({"error": "Đã có lỗi xảy ra."})

@@ -83,10 +83,6 @@ class Movie(models.Model):
             # "url"          : self.get_absolute_url(),
         }
 
-    def get_genres(self):
-        binary = bin(self.genres)[2:]
-        return ", ".join([self.GENRES_MAP[2**i] for (i, x) in enumerate(binary) if x == "1"])
-
     @classmethod
     def generate_genres(cls, genres):
         genres = [genre.strip() for genre in genres.split(",")]
@@ -94,11 +90,27 @@ class Movie(models.Model):
         genres = {GENRES_MAP[genre] for genre in genres}
         return sum(genres)
 
+    def get_genres(self):
+        binary = bin(self.genres)[2:]
+        return ", ".join([self.GENRES_MAP[2**i] for (i, x) in enumerate(binary) if x == "1"])
+
     def get_language(self):
         return self.LANGUAGE_MAP[self.language]
 
     def get_rate(self):
         return self.RATE_MAP[self.rate]
+
+    def get_schedule(self):
+        schedules = self.movie_schedule.all()
+        schedules = [schedule.serialize() for schedule in schedules]
+
+        date = {}
+        for schedule in schedules:
+            if schedule["date"] in date:
+                date[schedule["date"].__str__()].append(schedule)
+            else:
+                date[schedule["date"].__str__()] = [schedule]
+        return date
 
     def get_absolute_url(self):
         return reverse('movie-detail', args=[str(self.id)])

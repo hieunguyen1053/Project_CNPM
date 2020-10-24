@@ -1,13 +1,26 @@
+from django.core.paginator import Paginator
 from django.http import JsonResponse
+
 from .models import Auditorium
+
 
 def all(request):
     if request.method == "GET":
         try:
             auditoriums = Auditorium.objects.all()
+            paginator = Paginator(auditoriums, 20)
+
+            page_number = request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+            paginator = {
+                "number": page_obj.number,
+                "has_previous": page_obj.has_previous(),
+                "num_pages": page_obj.paginator.num_pages,
+                "has_next": page_obj.has_next(),
+            }
             auditoriums = [auditorium.serialize() for auditorium in auditoriums]
             auditoriums = sorted(auditoriums, key=lambda auditorium: auditorium["name"])
-            return JsonResponse({"auditoriums": auditoriums})
+            return JsonResponse({"auditoriums": auditoriums, "paginator": paginator})
         except Exception as e:
             print(e)
             return JsonResponse({"error": "Đã có lỗi xảy ra."})
