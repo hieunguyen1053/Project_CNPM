@@ -1,21 +1,28 @@
 {% extends "base_generic.html" %}
 
+{% block title %}
+<title>Quản lý phim</title>
+{% endblock %}
+
 {% block content %}
-<table class="table table-striped table-sm">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Tên phim</th>
-            <th>Thể loại</th>
-            <th>Thời lượng</th>
-            <th>Ngôn ngữ</th>
-            <th>Xếp loại</th>
-            <th>Thao tác</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
-<button type="button" class="btn btn-primary create">Tạo</button>
+<h2>Quản lý phim</h2>
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Tên phim</th>
+                <th>Thể loại</th>
+                <th>Thời lượng</th>
+                <th>Ngôn ngữ</th>
+                <th>Xếp loại</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button type="button" class="btn btn-primary create">Tạo</button>
+</div>
 
 <div class="modal" id="movieModal" tabindex="-1" role="dialog" aria-labelledby="movieModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -30,6 +37,13 @@
                 <form action="" method="post">
                     {% csrf_token %}
                     <input type="text" name="id" hidden>
+                    <div class="form-group">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="customSwitch1" name="status"
+                                selected>
+                            <label class="custom-control-label" for="customSwitch1">Trạng thái</label>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label for="title" class="col-form-label">Tên:</label>
                         <input type="text" class="form-control" name="title">
@@ -56,7 +70,7 @@
                     </div>
                     <div class="form-group">
                         <label for="time" class="col-form-label">Thời lượng:</label>
-                        <input type="date" class="form-control" name="time">
+                        <input type="number" class="form-control" name="time">
                     </div>
                     <div class="form-group">
                         <label for="language" class="col-form-label">Ngôn ngữ:</label>
@@ -74,8 +88,8 @@
                             {% endfor %}
                         </select>
                     </div>
+                </form>
             </div>
-            </form>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="create">Tạo</button>
                 <button type="button" class="btn btn-primary" id="edit">Lưu</button>
@@ -141,6 +155,9 @@
     async function get(id) {
         const response = await fetch("http://127.0.0.1:8000/api/v1/movie/" + id, { method: 'GET' });
         const result = await response.json();
+        if ($("input[name='status']").is(":checked") != result.movie.status) {
+            $("input[name='status']").click();
+        }
         $("input[name='id']").val(result.movie.id);
         $("input[name='title']").val(result.movie.title);
         $("textarea[name='director']").val(result.movie.director);
@@ -156,6 +173,7 @@
     async function edit(id) {
         var formdata = new FormData();
         formdata.append("csrfmiddlewaretoken", $("input[name='csrfmiddlewaretoken']").val());
+        formdata.append("status", $("input[name='status']").is(":checked"));
         formdata.append("title", $("input[name='title']").val());
         formdata.append("director", $("textarea[name='director']").val());
         formdata.append("actor", $("textarea[name='actor']").val());
@@ -191,31 +209,32 @@
         refresh();
     }
 
-    function refresh(e) {
-        $("#create").click(() => {
+    function refresh() {
+        $("#create").unbind('click').bind('click', (e) => {
             create();
         });
 
-        $("#edit").click((e) => {
+        $("#edit").unbind('click').bind('click', (e) => {
             if (confirm("Bạn có muốn lưu!")) {
                 edit($('input[name="id"]').val());
             }
         });
 
-        $("#delete").click((e) => {
+        $("#delete").unbind('click').bind('click', (e) => {
             if (confirm("Bạn có muốn xoá!")) {
                 del($('input[name="id"]').val());
             }
         });
 
-        $(".create").click((e) => {
+        $(".create").unbind('click').bind('click', (e) => {
+            $('.form-control').val("");
             $('#movieModal').modal('show');
             $('#create').show();
             $('#edit').hide();
             $('#delete').hide();
         });
 
-        $(".edit").click((e) => {
+        $(".edit").unbind('click').bind('click', (e) => {
             get($(e.target).data("id"));
             $('#movieModal').modal('show');
             $('#create').hide();
@@ -223,9 +242,12 @@
             $('#delete').show();
         });
 
-        $(".delete").click((e) => {
-            del($(e.target).data("id"));
+        $(".delete").unbind('click').bind('click', (e) => {
+            if (confirm("Bạn có muốn xoá!")) {
+                del($(e.target).data("id"));
+            }
         });
+        $('#movieModal').modal('hide');
     }
 
     $(document).ready(() => {

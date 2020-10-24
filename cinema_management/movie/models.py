@@ -39,7 +39,6 @@ class Movie(models.Model):
     - FAMILY    = 64
     - HORROR    = 128
     - THRILLER  = 256
-
     """
     class Rating(models.IntegerChoices):
         P   = 0
@@ -62,6 +61,7 @@ class Movie(models.Model):
     genres       = models.PositiveIntegerField(default=0)
     language     = models.PositiveIntegerField(choices=Language.choices)
     rate         = models.PositiveIntegerField(choices=Rating.choices)
+    status       = models.BooleanField(default=True)
 
     class Meta:
         verbose_name        = "Phim"
@@ -79,12 +79,20 @@ class Movie(models.Model):
             "genre"        : self.get_genres(),
             "language"     : self.language,
             "rate"         : self.rate,
-            "url"          : self.get_absolute_url(),
+            "status"       : self.status,
+            # "url"          : self.get_absolute_url(),
         }
 
     def get_genres(self):
         binary = bin(self.genres)[2:]
         return ", ".join([self.GENRES_MAP[2**i] for (i, x) in enumerate(binary) if x == "1"])
+
+    @classmethod
+    def generate_genres(cls, genres):
+        genres = [genre.strip() for genre in genres.split(",")]
+        GENRES_MAP = {v: k for k, v in cls.GENRES_MAP.items()}
+        genres = {GENRES_MAP[genre] for genre in genres}
+        return sum(genres)
 
     def get_language(self):
         return self.LANGUAGE_MAP[self.language]

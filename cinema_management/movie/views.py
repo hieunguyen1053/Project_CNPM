@@ -1,12 +1,6 @@
 from django.http import JsonResponse
 from .models import Movie
 
-def __convert(genres):
-    genres = [genre.strip() for genre in genres.split(",")]
-    GENRES_MAP = {v: k for k, v in Movie.GENRES_MAP.items()}
-    genres = {GENRES_MAP[genre] for genre in genres}
-    return sum(genres)
-
 def all(request):
     if request.method == "GET":
         try:
@@ -14,7 +8,7 @@ def all(request):
             movies = [movie.serialize() for movie in movies]
             return JsonResponse({"movies": movies})
         except Exception as e:
-            return JsonResponse({"error": e})
+            return JsonResponse({"error": "Đã có lỗi xảy ra."})
 
 def create(request):
     if request.method == "POST":
@@ -24,15 +18,15 @@ def create(request):
                 director = request.POST.get("director"),
                 actor = request.POST.get("actor"),
                 description = request.POST.get("description"),
-                genres = __convert(request.POST.get("genre")),
+                genres = Movie.generate_genres(request.POST.get("genre")),
                 release_date = request.POST.get("release_date"),
-                time = int(request.POST.get("time")),
+                time = request.POST.get("time"),
                 language = request.POST.get("language"),
                 rate = request.POST.get("rate"),
             )
             return JsonResponse({"message": "Đã thêm phim thành công."})
         except Exception as e:
-            return JsonResponse({"error": e})
+            return JsonResponse({"error": "Đã có lỗi xảy ra."})
 
 def get(request, id):
     if request.method == "GET":
@@ -41,7 +35,7 @@ def get(request, id):
             movie = movie.serialize()
             return JsonResponse({"movie": movie})
         except Exception as e:
-            return JsonResponse({"error": e})
+            return JsonResponse({"error": "Đã có lỗi xảy ra."})
 
 def edit(request, id):
     if request.method == "POST":
@@ -51,15 +45,17 @@ def edit(request, id):
             movie.director = request.POST.get("director")
             movie.actor = request.POST.get("actor")
             movie.description = request.POST.get("description")
-            movie.genres = __convert(request.POST.get("genre"))
+            movie.genres = Movie.generate_genres(request.POST.get("genre"))
             movie.release_date = request.POST.get("release_date")
-            movie.time = int(request.POST.get("time"))
+            movie.time = request.POST.get("time")
             movie.language = request.POST.get("language")
             movie.rate = request.POST.get("rate")
+            movie.status = True if request.POST.get("status") == "true" else False
             movie.save()
             return JsonResponse({"message": "Đã chỉnh sửa phim thành công."})
         except Exception as e:
-            return JsonResponse({"error": e})
+            print(e)
+            return JsonResponse({"error": "Đã có lỗi xảy ra."})
 
 def delete(request, id):
     if request.method == "GET":
@@ -68,4 +64,4 @@ def delete(request, id):
             movie.delete()
             return JsonResponse({"message": "Đã xoá phim thành công."})
         except Exception as e:
-            return JsonResponse({"error": e})
+            return JsonResponse({"error": "Đã có lỗi xảy ra."})
