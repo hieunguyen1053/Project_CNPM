@@ -10,10 +10,11 @@ def home(request):
 
 def login_view(request):
     if request.method == "GET":
-        if request.user.is_authenticated:
+        if request.user.is_superuser:
             return redirect('admin-movie')
-        else:
-            return render(request, 'signin.html')
+        if request.user.is_staff:
+            return redirect('movie')
+        return render(request, 'signin.html')
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
@@ -23,9 +24,9 @@ def login_view(request):
             if user.is_superuser:
                 return redirect('admin-movie')
             if user.is_staff:
-                return redirect('admin-movie')
+                return redirect('movie')
         else:
-            return render(request, 'signin.html')
+            return redirect('login')
 
 def logout_view(request):
     logout(request)
@@ -72,3 +73,13 @@ def admin_staff(request):
     if not request.user.is_superuser:
         return redirect('login')
     return render(request, 'staff/admin.html')
+
+def movie(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    context = {
+        "LANGUAGE_MAP": Movie.LANGUAGE_MAP,
+        "GENRES_MAP": Movie.GENRES_MAP,
+        "RATE_MAP": Movie.RATE_MAP,
+    }
+    return render(request, 'movie/index.html', context)
