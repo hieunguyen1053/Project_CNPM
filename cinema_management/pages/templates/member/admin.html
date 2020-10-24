@@ -78,10 +78,6 @@
 </div>
 
 <script>
-    TYPE_MAP = [{% for k, v in TYPE_MAP.items %} "{{v}}", {% endfor %}];
-    RATE_MAP = [{% for k, v in RATE_MAP.items %} "{{v}}", {% endfor %}];
-    LANGUAGE_MAP = [{% for k, v in LANGUAGE_MAP.items %} "{{v}}", {% endfor %}];
-
     async function load() {
         const page = new URLSearchParams(window.location.search).get("page");
         const response = await fetch(`/api/v1/member/?page=${page}`, { method: 'GET' });
