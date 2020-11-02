@@ -29,7 +29,6 @@ class Auditorium(models.Model):
     type           = models.PositiveIntegerField(choices=Type.choices)
     rows           = models.PositiveIntegerField(default=5)
     seats_per_row  = models.PositiveIntegerField(default=10)
-    seats_state    = models.TextField()
 
     class Meta:
         verbose_name        = "Rạp chiếu"
@@ -42,7 +41,6 @@ class Auditorium(models.Model):
             "type"          : self.type,
             "rows"          : self.rows,
             "seats_per_row" : self.seats_per_row,
-            "seats_state"   : self.seats_state,
         }
 
     def get_type(self):

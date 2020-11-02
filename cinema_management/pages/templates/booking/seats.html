@@ -1,0 +1,42 @@
+{% extends "index.html" %}
+
+{% block content %}
+{% load static %}
+<div class="container">
+    <link rel="stylesheet" href="{% static 'css/seats.css' %}">
+    <div class="ticketbox">
+        <div class="screen">
+            <span class="text-screen"></span>
+        </div>
+        {% for row in rows %}
+        <div class="row m-1 justify-content-center">
+            {% for seat in row %}
+            <div class="seat border {% if seat.status == '1' %}seat-occupied{% endif %} " data-price="{{ schedule.price }}">{{ seat.name }}</div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    <div class="price"></div>
+</div>
+<script>
+    $(document).ready(() => {
+        $(".seat:not(.seat-occupied)").click((e) => {
+            if ($(e.target).hasClass("seat-checked")) {
+                $(e.target).removeClass("seat-checked")
+            } else {
+                $(e.target).addClass("seat-checked")
+            }
+            updatePrice();
+        })
+
+        function updatePrice() {
+            const formater = new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' });
+            var count = $(".seat-checked").length;
+            var price = formater.format(count * 100000);
+            $(".price").text(price);
+        }
+
+        updatePrice();
+    })
+</script>
+{% endblock %}

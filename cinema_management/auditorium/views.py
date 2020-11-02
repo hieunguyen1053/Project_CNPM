@@ -28,14 +28,11 @@ def all(request):
 def create(request):
     if request.method == "POST":
         try:
-            num_seats = int(request.POST.get("rows")) * int(request.POST.get("seats_per_row"))
-            print(num_seats)
             Auditorium.objects.create(
                 name = request.POST.get("name"),
                 type = request.POST.get("type"),
                 rows = request.POST.get("rows"),
                 seats_per_row = int(request.POST.get("seats_per_row")),
-                seats_state = "0" * num_seats,
             )
             return JsonResponse({"message": "Đã thêm rạp chiếu thành công."})
         except Exception as e:
@@ -58,7 +55,6 @@ def edit(request, id):
             auditorium.type = request.POST.get("type")
             auditorium.rows = request.POST.get("rows")
             auditorium.seats_per_row = request.POST.get("seats_per_row")
-            auditorium.seats_state = request.POST.get("seats_state")
             auditorium.save()
             return JsonResponse({"message": "Đã chỉnh sửa rạp thành công."})
         except Exception as e:

@@ -68,10 +68,6 @@
                         <label for="seats_per_row" class="col-form-label">Số ghế mỗi hàng</label>
                         <input type="number" class="form-control" name="seats_per_row" min="5" max="20" step="1">
                     </div>
-                    <div class="form-group">
-                        <label for="seats_state" class="col-form-label">Trạng thái:</label>
-                        <input type="text" class="form-control" name="seats_state">
-                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -140,7 +136,6 @@
         $("select[name='type']").val(result.auditorium.type);
         $("input[name='rows']").val(result.auditorium.rows);
         $("input[name='seats_per_row']").val(result.auditorium.seats_per_row);
-        $("input[name='seats_state']").val(result.auditorium.seats_state);
     }
 
     async function edit(id) {
@@ -150,7 +145,6 @@
         formdata.append("type", $("select[name='type']").val());
         formdata.append("rows", $("input[name='rows']").val());
         formdata.append("seats_per_row", $("input[name='seats_per_row']").val());
-        formdata.append("seats_state", $("input[name='seats_state']").val());
 
         const response = await fetch("/api/v1/auditorium/" + id + "/edit", { method: 'POST', body: formdata });
         const result = await response.json();

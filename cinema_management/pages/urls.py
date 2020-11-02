@@ -11,4 +11,6 @@ urlpatterns = [
     path('admin/member', views.admin_member, name='admin-member'),
     path('admin/staff', views.admin_staff, name='admin-staff'),
     path('movie', views.movie, name='movie'),
+    path('movie/<int:id>', views.movie_detail, name='movie-detail'),
+    path('booking/auditorium/<str:auditorium>/date/<int:date>/time/<int:time>', views.booking, name='booking'),
 ]

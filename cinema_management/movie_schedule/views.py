@@ -29,6 +29,8 @@ def all(request):
 def create(request):
     if request.method == "POST":
         try:
+            num_seats = int(request.POST.get("rows")) * int(request.POST.get("seats_per_row"))
+
             movie = request.POST.get("movie")
             movie = Movie.objects.get(id=movie)
             auditorium = request.POST.get("auditorium")
@@ -41,6 +43,7 @@ def create(request):
                     time = time,
                     date = request.POST.get("date"),
                     price = request.POST.get("price"),
+                    seats_state = "0" * num_seats,
                 )
             return JsonResponse({"message": "Đã thêm lịch chiếu thành công."})
         except IntegrityError as e:
@@ -71,6 +74,7 @@ def edit(request, id):
             schedule.date = request.POST.get("date")
             schedule.time = request.POST.get("time")
             schedule.price = request.POST.get("price")
+            schedule.seats_state = request.POST.get("seats_state")
             schedule.save()
             return JsonResponse({"message": "Đã chỉnh sửa lịch chiếu thành công."})
         except Exception as e:
