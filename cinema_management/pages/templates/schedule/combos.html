@@ -1,0 +1,72 @@
+{% extends "index.html" %}
+
+{% block content %}
+{% load static %}
+<div class="container">
+    <form class="form" action="/confirm" method="post">
+        {% csrf_token %}
+        <input type="text" name="seats" hidden>
+        <input type="text" name="combos" hidden>
+    </form>
+    <div>{{ schedule.movie.title }}</div>
+    <div>{{ schedule.movie.get_rate }}</div>
+    <div>Cinema {{ schedule.auditorium.name }}</div>
+    <div class="seats"></div>
+    <div class="price"></div>
+    <div class="state"></div>
+    <button type="button" class="btn btn-primary" id="next">Tiếp tục</button>
+</div>
+<script>
+    $(".seat:not(.seat-occupied)").click((e) => {
+        if ($(e.target).hasClass("seat-checked")) {
+            $(e.target).removeClass("seat-checked")
+        } else {
+            $(e.target).addClass("seat-checked")
+        }
+        updatePrice();
+        updateSeat();
+    })
+
+    $("#next").click(() => {
+        $("form").submit()
+    })
+
+    function updatePrice() {
+        var price = 0;
+        const formater = new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' });
+        $(".seat-checked").each((index, element) => {
+            price += $(element).data("seat-price")
+        })
+        $(".price").text("Phim: " + formater.format(price));
+    }
+
+    function updateSeat() {
+        var seats = [];
+        var seats_checked_state = "";
+        $(".seat").each((index, element) => {
+            if ($(element).hasClass("seat-checked")) {
+                seats.push($(element).text())
+                seats_checked_state += "1";
+            } else {
+                seats_checked_state += "0";
+            }
+        })
+        $(".seats").text("Ghế: " + seats.join(", "))
+        $("input[name='seats']").val(seats_checked_state);
+    }
+
+    async function load() {
+        const response = await fetch("/api/v1/schedule/{{ schedule.id }}", { method: 'GET' });
+        const result = await response.json();
+        $("input[name='movie']").val(result.schedule.movie.id);
+        $("input[name='auditorium']").val(result.schedule.auditorium.id);
+        $("input[name='date']").val(result.schedule.date);
+        $("input[name='time']").val(result.schedule.time);
+    }
+
+    $(document).ready(() => {
+        load()
+        updatePrice();
+    })
+</script>
+{% endblock %}

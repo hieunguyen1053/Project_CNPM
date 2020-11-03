@@ -4,6 +4,12 @@ from movie.models import Movie
 from auditorium.models import Auditorium
 
 # Create your models here.
+class Seat:
+    def __init__(self, id=None, name=None, status=0):
+        self.id = id
+        self.name = name
+        self.status = status
+
 class MovieSchedule(models.Model):
     WEEKDAY_MAP = {
         0: "Mon",
@@ -58,9 +64,19 @@ class MovieSchedule(models.Model):
     def get_time(self):
         return self.time.strftime("%I:%M %p")
 
-    def get_time_url(self):
-        t = self.time
-        return t.hour * 3600 + t.minute * 60
+    def get_seats(self):
+        num_rows = self.auditorium.rows
+        num_cols = self.auditorium.seats_per_row
 
-    def get_date_url(self):
-        return self.date.strftime("%Y%m%d")
+        rows = []
+        for i in range(num_rows):
+            row = []
+            for j in range(num_cols):
+                seat = Seat(
+                    id = i * num_cols + j,
+                    name = chr(ord("A") + i) + str(j+1),
+                    status = self.seats_state[i * num_cols + j]
+                )
+                row.append(seat)
+            rows.append(row)
+        return rows

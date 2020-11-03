@@ -1,9 +1,11 @@
+import datetime
+
 from auditorium.models import Auditorium
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect, render
 from movie.models import Movie
 from movie_schedule.models import MovieSchedule
-import datetime
+
 
 # Create your views here
 def home(request):
@@ -106,36 +108,43 @@ def movie_detail(request, id):
     }
     return render(request, 'movie/detail.html', context)
 
-def booking(request, auditorium, date, time):
-    year = date // 10000
-    month = date % 10000 // 100
-    day = date % 100
-    hour = time // 3600
-    minute = time % 3600 // 60
-    schedules = MovieSchedule.objects.all()
-
-    auditorium = Auditorium.objects.get(id=auditorium)
-
-    schedule = schedules.filter(
-        auditorium = auditorium,
-        date=datetime.datetime(year=year, month=month, day=day),
-        time=datetime.time(hour=hour, minute=minute)
-    ).first()
-
-    rows = []
-    for i in range(auditorium.rows):
-        row = []
-        for j in range(auditorium.seats_per_row):
-            row.append({
-                "id": i * auditorium.seats_per_row + j,
-                "name": chr(ord("A") + i) + str(j+1),
-                "status": schedule.seats_state[i * auditorium.seats_per_row + j],
-            })
-        rows.append(row)
-
+def booking_seats(request, id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    schedule = MovieSchedule.objects.get(id=id)
+    rows = schedule.get_seats()
     context = {
-        "auditorium": auditorium,
         "schedule": schedule,
         "rows": rows,
     }
-    return render(request, 'booking/seats.html', context)
+    return render(request, 'schedule/seats.html', context)
+
+def booking_combos(request, id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    if request.method == "POST":
+        if request.POST.get("seats") != "":
+            seats = request.POST.get("seats")
+            schedule = MovieSchedule.objects.get(id=id)
+            context = {
+                "schedule": schedule,
+                "seats": seats,
+            }
+            return render(request, 'schedule/combos.html', context)
+        return redirect(booking_seats, id)
+
+def booking_confirm(request, id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    if request.method == "POST":
+        if request.POST.get("seats") != "":
+            seats = request.POST.get("seats")
+            combos = request.POST.get("combos")
+            schedule = MovieSchedule.objects.get(id=id)
+            context = {
+                "schedule": schedule,
+                "seats": seats,
+                "combos": combos,
+            }
+            return render(request, 'schedule/combos.html', context)
+        return redirect(booking_seats, id)

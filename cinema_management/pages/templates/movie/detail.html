@@ -23,7 +23,7 @@
         <ul class="nav">
             {% for schedule in schedule_group %}
             <li class="nav-item">
-                <a class="nav-link active" href="/booking/auditorium/{{ schedule.auditorium.id }}/date/{{ schedule.get_date_url }}/time/{{ schedule.get_time_url }}">{{ schedule.get_time }}</a>
+                <a class="nav-link active" href="/booking/{{ schedule.id }}/seats">{{ schedule.get_time }}</a>
             </li>
             {% endfor %}
         </ul>
