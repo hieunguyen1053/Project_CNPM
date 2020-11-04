@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'pages',
     'auditorium',
     'movie',
+    'combo',
     'movie_schedule',
     'staff',
     'member',

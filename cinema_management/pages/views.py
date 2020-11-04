@@ -1,6 +1,7 @@
 import datetime
 
 from auditorium.models import Auditorium
+from combo.models import Combo
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect, render
 from movie.models import Movie
@@ -77,6 +78,11 @@ def admin_staff(request):
         return redirect('login')
     return render(request, 'staff/admin.html')
 
+def admin_combo(request):
+    if not request.user.is_superuser:
+        return redirect('login')
+    return render(request, 'combo/admin.html')
+
 def movie(request):
     if not request.user.is_authenticated:
         return redirect('login')
@@ -117,7 +123,7 @@ def booking_seats(request, id):
         "schedule": schedule,
         "rows": rows,
     }
-    return render(request, 'schedule/seats.html', context)
+    return render(request, 'schedule/index.html', context)
 
 def booking_combos(request, id):
     if not request.user.is_authenticated:
@@ -125,12 +131,17 @@ def booking_combos(request, id):
     if request.method == "POST":
         if request.POST.get("seats") != "":
             seats = request.POST.get("seats")
+            price = request.POST.get("price")
             schedule = MovieSchedule.objects.get(id=id)
+            combos = Combo.objects.all()
+            combos = [combo.serialize() for combo in combos]
             context = {
                 "schedule": schedule,
                 "seats": seats,
+                "combos": combos,
+                "price": price,
             }
-            return render(request, 'schedule/combos.html', context)
+            return render(request, 'combo/index.html', context)
         return redirect(booking_seats, id)
 
 def booking_confirm(request, id):
@@ -146,5 +157,5 @@ def booking_confirm(request, id):
                 "seats": seats,
                 "combos": combos,
             }
-            return render(request, 'schedule/combos.html', context)
+            return render(request, 'combo/index.html', context)
         return redirect(booking_seats, id)

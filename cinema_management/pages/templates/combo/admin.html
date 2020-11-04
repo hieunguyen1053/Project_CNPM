@@ -1,23 +1,24 @@
 {% extends "admin.html" %}
 
 {% block title %}
-<title>Quản lý phim</title>
+<title>Quản lý combo</title>
 {% endblock %}
 
 {% block content %}
 <div class="d-float">
-    <span class="float-left"><h2>Quản lý nhân viên</h2></span>
-    <span class="float-right"><button type="button" class="btn btn-primary create"><i class="fas fa-plus"></i></button></span>
+    <span class="float-left">
+        <h2>Quản lý combo</h2>
+    </span>
+    <span class="float-right"><button type="button" class="btn btn-primary create"><i
+                class="fas fa-plus"></i></button></span>
 </div>
 <div class="table-responsive">
     <table class="table table-striped table-sm">
         <thead>
             <tr>
                 <th>#</th>
-                <th>Username</th>
-                <th>Họ và tên lót</th>
-                <th>Tên</th>
-                <th>Quản trị viên</th>
+                <th>Tên combo</th>
+                <th>Giá</th>
                 <th>Thao tác</th>
             </tr>
         </thead>
@@ -32,11 +33,11 @@
     </ul>
 </nav>
 
-<div class="modal" id="staffModal" tabindex="-1" role="dialog" aria-labelledby="schedstaffLabel" aria-hidden="true">
+<div class="modal" id="comboModal" tabindex="-1" role="dialog" aria-labelledby="comboModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Thông tin lịch chiếu</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Thông tin combo</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -46,26 +47,13 @@
                     {% csrf_token %}
                     <input type="text" name="id" hidden>
                     <div class="form-group">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="customSwitch1" name="is_superuser">
-                            <label class="custom-control-label" for="customSwitch1">Quản trị viên</label>
-                        </div>
+                        <label for="name" class="col-form-label">Tên combo:</label>
+                        <input type="text" class="form-control" name="name">
                     </div>
                     <div class="form-group">
-                        <label for="username" class="col-form-label">Username:</label>
-                        <input type="text" class="form-control" name="username">
-                    </div>
-                    <div class="form-group">
-                        <label for="last_name" class="col-form-label">Họ và tên lót:</label>
-                        <input type="text" class="form-control" name="last_name">
-                    </div>
-                    <div class="form-group">
-                        <label for="first_name" class="col-form-label">Tên:</label>
-                        <input type="text" class="form-control" name="first_name">
-                    </div>
-                    <div class="form-group">
-                        <label for="password" class="col-form-label">Mật khẩu:</label>
-                        <input type="password" class="form-control" name="password">
+                        <label for="price" class="col-form-label">Giá:</label>
+                        <input type="number" class="form-control" name="price" min="60000.00" max="500000.00"
+                            step="10000.00">
                     </div>
                 </form>
             </div>
@@ -81,21 +69,19 @@
 <script>
     async function load() {
         const page = new URLSearchParams(window.location.search).get("page");
-        const response = await fetch(`/api/v1/staff/?page=${page || 1}`, { method: 'GET' });
+        const response = await fetch(`/api/v1/combo/?page=${page || 1}`, { method: 'GET' });
         const result = await response.json();
 
         $(".table tbody").empty();
-        for (const staff of result.staffs) {
+        for (const combo of result.combos) {
             $(".table tbody").append(
                 `<tr>
-                    <td>${staff.id}</td>
-                    <td>${staff.username}</td>
-                    <td>${staff.last_name}</td>
-                    <td>${staff.first_name}</td>
-                    <td>${staff.is_superuser}</td>
+                    <td>${combo.id}</td>
+                    <td>${combo.name}</td>
+                    <td>${combo.price}</td>
                     <td>
-                        <a class="edit" data-id="${staff.id}">Sửa</a>|
-                        <a class="delete" data-id="${staff.id}">Xoá</a>
+                        <a class="edit" data-id="${combo.id}">Sửa</a>|
+                        <a class="delete" data-id="${combo.id}">Xoá</a>
                     </td>
                 </tr>`
             );
@@ -109,13 +95,10 @@
     async function create() {
         var formdata = new FormData();
         formdata.append("csrfmiddlewaretoken", $("input[name='csrfmiddlewaretoken']").val());
-        formdata.append("username", $("input[name='username']").val());
-        formdata.append("password", $("input[name='password']").val());
-        formdata.append("first_name", $("input[name='first_name']").val());
-        formdata.append("last_name", $("input[name='last_name']").val());
-        formdata.append("is_superuser", $("input[name='is_superuser']").is(":checked"));
+        formdata.append("name", $("input[name='name']").val());
+        formdata.append("price", $("input[name='price']").val());
 
-        const response = await fetch("/api/v1/staff/create", { method: 'POST', body: formdata });
+        const response = await fetch("/api/v1/combo/create", { method: 'POST', body: formdata });
         const result = await response.json();
         if (result.message) {
             alert(result.message);
@@ -128,28 +111,20 @@
     }
 
     async function get(id) {
-        const response = await fetch("/api/v1/staff/" + id, { method: 'GET' });
+        const response = await fetch("/api/v1/combo/" + id, { method: 'GET' });
         const result = await response.json();
-        $("input[name='id']").val(result.staff.id);
-        if ($("input[name='is_superuser']").is(":checked") != result.staff.is_superuser) {
-            $("input[name='is_superuser']").click();
-        }
-        $("input[name='username']").val(result.staff.username);
-        $("input[name='first_name']").val(result.staff.first_name);
-        $("input[name='last_name']").val(result.staff.last_name);
+        $("input[name='id']").val(result.combo.id);
+        $("input[name='name']").val(result.combo.name);
+        $("input[name='price']").val(result.combo.price);
     }
 
     async function edit(id) {
         var formdata = new FormData();
         formdata.append("csrfmiddlewaretoken", $("input[name='csrfmiddlewaretoken']").val());
-        formdata.append("username", $("input[name='username']").val());
-        formdata.append("first_name", $("input[name='first_name']").val());
-        formdata.append("last_name", $("input[name='last_name']").val());
-        formdata.append("is_superuser", $("input[name='is_superuser']").is(":checked"));
-        if ($("input[name='password']").val() != "")
-            formdata.append("password", $("input[name='password']").val());
+        $("input[name='name']").val(result.combo.name);
+        $("input[name='price']").val(result.combo.price);
 
-        const response = await fetch("/api/v1/staff/" + id + "/edit", { method: 'POST', body: formdata });
+        const response = await fetch("/api/v1/combo/" + id + "/edit", { method: 'POST', body: formdata });
         const result = await response.json();
         if (result.message) {
             alert(result.message);
@@ -162,7 +137,7 @@
     }
 
     async function del(id) {
-        const response = await fetch("/api/v1/staff/" + id + "/delete", { method: 'GET' });
+        const response = await fetch("/api/v1/combo/" + id + "/delete", { method: 'GET' });
         const result = await response.json();
         if (result.message) {
             alert(result.message);
@@ -193,7 +168,7 @@
 
         $(".create").unbind('click').bind('click', (e) => {
             $('.form-control').val("");
-            $('#staffModal').modal('show');
+            $('#comboModal').modal('show');
             $('#create').show();
             $('#edit').hide();
             $('#delete').hide();
@@ -201,7 +176,7 @@
 
         $(".edit").unbind('click').bind('click', (e) => {
             get($(e.target).data("id"));
-            $('#staffModal').modal('show');
+            $('#comboModal').modal('show');
             $('#create').hide();
             $('#edit').show();
             $('#delete').show();
@@ -212,11 +187,10 @@
                 del($(e.target).data("id"));
             }
         });
-        $('#staffModal').modal('hide');
+        $('#comboModal').modal('hide');
     }
 
     $(document).ready(() => {
-
         load();
     });
 </script>

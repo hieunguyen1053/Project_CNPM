@@ -114,7 +114,7 @@
 
     async function load() {
         const page = new URLSearchParams(window.location.search).get("page");
-        const response = await fetch(`/api/v1/movie/?page=${page}`, { method: 'GET' });
+        const response = await fetch(`/api/v1/movie/?page=${page || 1}`, { method: 'GET' });
         const result = await response.json();
 
         $(".table tbody").empty();

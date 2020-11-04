@@ -3,11 +3,24 @@
 {% block content %}
 {% load static %}
 <div class="container">
-    <form class="form" action="/confirm" method="post">
+    <form class="form" action="/booking/{{ schedule.id }}/combos" method="post">
         {% csrf_token %}
         <input type="text" name="seats" hidden>
-        <input type="text" name="combos" hidden>
+        <input type="number" name="price" hidden>
     </form>
+    <link rel="stylesheet" href="{% static 'css/seats.css' %}">
+    <div class="ticketbox">
+        <div class="screen">
+            <span class="text-screen"></span>
+        </div>
+        {% for row in rows %}
+        <div class="row m-1 justify-content-center">
+            {% for seat in row %}
+            <div class="seat border{% if seat.status == '1' %} seat-occupied{% endif %}" data-seat-price="{{ schedule.price }}" data-seat-id="{{ seat.id }}">{{ seat.name }}</div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
     <div>{{ schedule.movie.title }}</div>
     <div>{{ schedule.movie.get_rate }}</div>
     <div>Cinema {{ schedule.auditorium.name }}</div>
@@ -38,6 +51,7 @@
             price += $(element).data("seat-price")
         })
         $(".price").text("Phim: " + formater.format(price));
+        $("input[name='price']").val(price);
     }
 
     function updateSeat() {
@@ -46,13 +60,10 @@
         $(".seat").each((index, element) => {
             if ($(element).hasClass("seat-checked")) {
                 seats.push($(element).text())
-                seats_checked_state += "1";
-            } else {
-                seats_checked_state += "0";
             }
         })
-        $(".seats").text("Ghế: " + seats.join(", "))
-        $("input[name='seats']").val(seats_checked_state);
+        $(".seats").text("Ghế: " + seats.join(", "));
+        $("input[name='seats']").val(seats.join(","));
     }
 
     async function load() {

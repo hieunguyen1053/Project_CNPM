@@ -1,0 +1,63 @@
+{% extends "index.html" %}
+
+{% block content %}
+{% load static %}
+<div class="container">
+    <form class="form" action="/confirm" method="post">
+        {% csrf_token %}
+        <input type="text" name="seats" hidden value="{{ seats }}"">
+        <input type="number" name="price1" hidden value="{{ price }}">
+        <input type="text" name="combos" hidden>
+        <input type="number" name="price2" hidden>
+    </form>
+    <div class="row">
+        {% for combo in combos %}
+        <div class="col-6">
+            {{ combo.name }} {{ combo.price }} <input type="number" class="combo" data-id="{{ combo.id }}" data-price="{{ combo.price }}" style="width: 50px;" value="0" min="0">
+        </div>
+        {% endfor %}
+    </div>
+    <div>{{ schedule.movie.title }}</div>
+    <div>{{ schedule.movie.get_rate }}</div>
+    <div>Cinema {{ schedule.auditorium.name }}</div>
+    <div class="seats"></div>
+    <div class="price1">{{ price }}</div>
+    <div class="price2"></div>
+    <div class="state"></div>
+    <button type="button" class="btn btn-primary" id="next">Tiếp tục</button>
+</div>
+<script>
+    $("#next").click(() => {
+        $("form").submit()
+    })
+
+    $("input.combo").change(() => {
+        updatePrice();
+    })
+
+    function updatePrice() {
+        var price = 0;
+        const formater = new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' });
+        $("input.combo").each((index, element) => {
+            if ($(element).val() != 0) {
+                price += $(element).val() * $(element).data("price")
+            }
+        })
+        $(".price2").text("Phim: " + formater.format(price));
+    }
+
+    async function load() {
+        const response = await fetch("/api/v1/schedule/{{ schedule.id }}", { method: 'GET' });
+        const result = await response.json();
+        $("input[name='movie']").val(result.schedule.movie.id);
+        $("input[name='auditorium']").val(result.schedule.auditorium.id);
+        $("input[name='date']").val(result.schedule.date);
+        $("input[name='time']").val(result.schedule.time);
+    }
+
+    $(document).ready(() => {
+        load()
+        updatePrice();
+    })
+</script>
+{% endblock %}
