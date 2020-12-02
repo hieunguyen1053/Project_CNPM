@@ -88,6 +88,14 @@ def admin_combo(request):
         return redirect('login')
     return render(request, 'admin/combo.html')
 
+def admin_receipt(request):
+    if not request.user.is_superuser:
+        return redirect('login')
+    context = {
+        "TYPE_MAP": Auditorium.TYPE_MAP,
+    }
+    return render(request, 'admin/receipt.html', context)
+
 def movie(request):
     if not request.user.is_authenticated:
         return redirect('login')

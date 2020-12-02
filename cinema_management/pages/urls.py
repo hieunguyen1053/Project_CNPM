@@ -11,6 +11,7 @@ urlpatterns = [
     path('admin/member', views.admin_member, name='admin-member'),
     path('admin/combo', views.admin_combo, name='admin-combo'),
     path('admin/staff', views.admin_staff, name='admin-staff'),
+    path('admin/receipt', views.admin_receipt, name='admin-receipt'),
     path('movie', views.movie, name='movie'),
     path('movie/<int:id>', views.movie_detail, name='movie-detail'),
     path('booking/<int:id>/seats', views.booking_seats, name='booking_seats'),
