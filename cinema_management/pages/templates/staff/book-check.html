@@ -4,23 +4,50 @@
 {% block content %}
 {% load static %}
 <div class="container">
+    <h3 class="mt-5">Xác nhận</h3>
     <form action="" method="post">
         {% csrf_token %}
-        <div>{{ schedule.movie.title }}</div>
-        <div>{{ schedule.movie.get_rate }}</div>
-        <div>Cinema {{ schedule.auditorium.name }}</div>
-        <div class="seats">{% for seat in seats %}{{ seat.name }},{% endfor %}</div>
         <input type="text" name="schedule" hidden value="{{ schedule.id }}">
-        <input type="text" name="member">
-        <input type="text" name="secret">
         <input type="text" name="seats" hidden value="{{ seats|to_json }}">
         <input type="text" name="combos" hidden value="{{ combos|to_json }}">
+        <div class="form-group">
+            <label for="member" class="col-form-label">Nhập mã thành viên:</label>
+            <input type="text" name="member">
+        </div>
+        <div class="form-group">
+            <label for="secret" class="col-form-label">Nhập mã bí mật:</label>
+            <input type="text" name="secret">
+            <span class="verify text-success">Xác nhận thành công</span>
+            <span class="verify text-danger">Xác nhận thất bại</span>
+        </div>
     </form>
-    <div class="price_seats">{{ seats|get_sum_price_seats }}</div>
-    <div class="price_combos">{{ combos|get_sum_price_combos }}</div>
-    <div class="price_sum"></div>
-    <div class="state"></div>
-    <button type="button" class="btn btn-primary" id="create">Tiếp tục</button>
+    <hr>
+    <div class="row">
+        <div class="col-lg-1">
+            <img class="img-fluid d-block mx-auto rounded mb-4 mb-lg-0" src="{{ schedule.movie.image_url }}" alt="">
+        </div>
+        <div class="col-lg-3">
+            <div>{{ schedule.movie.title }}</div>
+            <div>{{ schedule.auditorium.get_type }}</div>
+        </div>
+        <div class="col-lg-3">
+            <div>Suất chiếu: {{ schedule.time }}, {{ schedule.date }}</div>
+            <div>Phòng chiếu: Cinema {{ schedule.auditorium.name }}</div>
+            <div>Ghế:
+                {% for seat in seats %}
+                {{ seat.name }}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div>Phim: <span class="price_seats">{{ seats|get_sum_price_seats }}</span></div>
+            <div>Combo: <span class="price_combos">{{ combos|get_sum_price_combos }}</span></div>
+            <div>Tổng: <span class="price_sum"></span></div>
+        </div>
+        <div class="col-lg-2">
+            <button type="button" class="btn btn-primary" id="create">Xác nhận</button>
+        </div>
+    </div>
 </div>
 <script>
     function updatePrice() {
@@ -28,9 +55,9 @@
         var price_seats = Number.parseInt($(".price_seats").text());
         var price_combos = Number.parseInt($(".price_combos").text());
         var price_sum = price_seats + price_combos;
-        $(".price_combos").text("Combo: " + formater.format(price_combos));
-        $(".price_seats").text("Phim: " + formater.format(price_seats));
-        $(".price_sum").text("Tổng: " + formater.format(price_sum));
+        $(".price_combos").text(formater.format(price_combos));
+        $(".price_seats").text(formater.format(price_seats));
+        $(".price_sum").text(formater.format(price_sum));
     }
 
     async function create() {
@@ -62,17 +89,18 @@
         const result = await response.json();
 
         if (result.message) {
-            alert(result.message);
-            return true;
-        }
-        if (result.error) {
-            alert(result.error);
-            return false;
+            $("#create").attr("disabled", false);
+            $(".verify.text-success").show();
+            $(".verify.text-danger").hide();
+        } else {
+            $("#create").attr("disabled", true);
+            $(".verify.text-success").hide();
+            $(".verify.text-danger").show();
         }
     }
 
     $("#create").click(() => {
-        if (verify()) { create(); }
+        create();
     })
 
     $("input[name='secret']").change(() => {
@@ -81,6 +109,8 @@
 
     $(document).ready(() => {
         updatePrice();
+        $("#create").attr("disabled", true);
+        $(".verify").hide();
     })
 </script>
 {% endblock %}

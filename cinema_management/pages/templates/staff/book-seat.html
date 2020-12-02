@@ -20,13 +20,29 @@
         </div>
         {% endfor %}
     </div>
-    <div>{{ schedule.movie.title }}</div>
-    <div>{{ schedule.movie.get_rate }}</div>
-    <div>Cinema {{ schedule.auditorium.name }}</div>
-    <div class="seats"></div>
-    <div class="price_seats"></div>
-    <div class="state"></div>
-    <button type="button" class="btn btn-primary" id="next">Tiếp tục</button>
+    <hr>
+    <div class="row">
+        <div class="col-lg-1">
+            <img class="img-fluid d-block mx-auto rounded mb-4 mb-lg-0" src="{{ schedule.movie.image_url }}" alt="">
+        </div>
+        <div class="col-lg-3">
+            <div>{{ schedule.movie.title }}</div>
+            <div>{{ schedule.auditorium.get_type }}</div>
+        </div>
+        <div class="col-lg-3">
+            <div>Suất chiếu: {{ schedule.time }}, {{ schedule.date }}</div>
+            <div>Phòng chiếu: Cinema {{ schedule.auditorium.name }}</div>
+            <div>Ghế: <span class="seats"></span></div>
+        </div>
+        <div class="col-lg-3">
+            <div>Phim: <span class="price_seats"></span></div>
+            <div>Combo: <span class="price_combos"></span></div>
+            <div>Tổng: <span class="price_sum"></span></div>
+        </div>
+        <div class="col-lg-2">
+            <button type="button" class="btn btn-primary" id="next">Tiếp tục</button>
+        </div>
+    </div>
 </div>
 <script>
     $(".seat:not(.seat-occupied)").click((e) => {
@@ -49,7 +65,11 @@
         $(".seat-checked").each((index, element) => {
             price_seats += $(element).data("price")
         })
-        $(".price_seats").text("Phim: " + formater.format(price_seats));
+        var price_combos = 0;
+        var price_sum = price_seats + price_combos;
+        $(".price_seats").text(formater.format(price_seats));
+        $(".price_combos").text(formater.format(price_combos));
+        $(".price_sum").text(formater.format(price_sum));
     }
 
     function updateSeat() {
@@ -65,7 +85,7 @@
                 });
             }
         })
-        $(".seats").text("Ghế: " + seats.join(", "));
+        $(".seats").text(seats.join(", "));
         $("input[name='seats']").val(JSON.stringify(seat_objs));
     }
 
