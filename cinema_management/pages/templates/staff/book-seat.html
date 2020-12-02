@@ -6,7 +6,6 @@
     <form class="form" action="/booking/{{ schedule.id }}/combos" method="post">
         {% csrf_token %}
         <input type="text" name="seats" hidden>
-        <input type="number" name="price" hidden>
     </form>
     <link rel="stylesheet" href="{% static 'css/seats.css' %}">
     <div class="ticketbox">
@@ -16,7 +15,7 @@
         {% for row in rows %}
         <div class="row m-1 justify-content-center">
             {% for seat in row %}
-            <div class="seat border{% if seat.status == '1' %} seat-occupied{% endif %}" data-seat-price="{{ schedule.price }}" data-seat-id="{{ seat.id }}">{{ seat.name }}</div>
+            <div class="seat border{% if seat.status == '1' %} seat-occupied{% endif %}" data-price="{{ schedule.price }}" data-id="{{ seat.id }}" data-name="{{ seat.name }}">{{ seat.name }}</div>
             {% endfor %}
         </div>
         {% endfor %}
@@ -25,7 +24,7 @@
     <div>{{ schedule.movie.get_rate }}</div>
     <div>Cinema {{ schedule.auditorium.name }}</div>
     <div class="seats"></div>
-    <div class="price"></div>
+    <div class="price_seats"></div>
     <div class="state"></div>
     <button type="button" class="btn btn-primary" id="next">Tiếp tục</button>
 </div>
@@ -45,38 +44,32 @@
     })
 
     function updatePrice() {
-        var price = 0;
+        var price_seats = 0;
         const formater = new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' });
         $(".seat-checked").each((index, element) => {
-            price += $(element).data("seat-price")
+            price_seats += $(element).data("price")
         })
-        $(".price").text("Phim: " + formater.format(price));
-        $("input[name='price']").val(price);
+        $(".price_seats").text("Phim: " + formater.format(price_seats));
     }
 
     function updateSeat() {
         var seats = [];
-        var seats_checked_state = "";
+        var seat_objs = [];
         $(".seat").each((index, element) => {
             if ($(element).hasClass("seat-checked")) {
-                seats.push($(element).text())
+                seats.push($(element).data("name"));
+                seat_objs.push({
+                    "id": $(element).data("id"),
+                    "name": $(element).data("name"),
+                    "price": $(element).data("price"),
+                });
             }
         })
         $(".seats").text("Ghế: " + seats.join(", "));
-        $("input[name='seats']").val(seats.join(","));
-    }
-
-    async function load() {
-        const response = await fetch("/api/v1/schedule/{{ schedule.id }}", { method: 'GET' });
-        const result = await response.json();
-        $("input[name='movie']").val(result.schedule.movie.id);
-        $("input[name='auditorium']").val(result.schedule.auditorium.id);
-        $("input[name='date']").val(result.schedule.date);
-        $("input[name='time']").val(result.schedule.time);
+        $("input[name='seats']").val(JSON.stringify(seat_objs));
     }
 
     $(document).ready(() => {
-        load()
         updatePrice();
     })
 </script>

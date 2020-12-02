@@ -1,0 +1,74 @@
+{% extends "index.html" %}
+{% load movie_filters %}
+
+{% block content %}
+{% load static %}
+<div class="container">
+    <input type="text" name="price_seats" hidden value="{{ seats|get_sum_price_seats }}">
+    <form class="form" action="/booking/{{ schedule.id }}/check" method="post">
+        {% csrf_token %}
+        <input type="text" name="seats" hidden value="{{ seats|to_json }}">
+        <input type="text" name="combos" hidden>
+    </form>
+    <div class="row">
+        {% for combo in combos %}
+        <div class="col-6">
+            {{ combo.name }} {{ combo.price }} <input type="number" class="combo" data-id="{{ combo.id }}" data-price="{{ combo.price }}" style="width: 50px;" value="0" min="0">
+        </div>
+        {% endfor %}
+    </div>
+    <div>{{ schedule.movie.title }}</div>
+    <div>{{ schedule.movie.get_rate }}</div>
+    <div>Cinema {{ schedule.auditorium.name }}</div>
+    <div class="seats"></div>
+    <div class="price_seats"></div>
+    <div class="price_combos"></div>
+    <div class="price_sum"></div>
+    <div class="state"></div>
+    <button type="button" class="btn btn-primary" id="next">Tiếp tục</button>
+</div>
+<script>
+    $("#next").click(() => {
+        $("form").submit()
+    })
+
+    $("input.combo").change(() => {
+        updatePrice();
+        updateCombos();
+    })
+
+    function updatePrice() {
+        var price_combos = 0;
+        const formater = new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' });
+        $("input.combo").each((index, element) => {
+            if ($(element).val() != 0) {
+                price_combos += $(element).val() * $(element).data("price")
+            }
+        })
+        var price_seats = Number.parseInt($("input[name='price_seats']").val());
+        var price_sum = price_seats + price_combos;
+        $(".price_combos").text("Combo: " + formater.format(price_combos));
+        $(".price_seats").text("Phim: " + formater.format(price_seats));
+        $(".price_sum").text("Tổng: " + formater.format(price_sum));
+    }
+
+    function updateCombos() {
+        var combo_objs = [];
+
+        $("input.combo").each((index, element) => {
+            if ($(element).val() != 0) {
+                combo_objs.push({
+                    "id": $(element).data("id"),
+                    "price": $(element).data("price"),
+                    "num": Number.parseInt($(element).val()),
+                })
+            }
+        })
+        $("input[name='combos']").val(JSON.stringify(combo_objs))
+    }
+
+    $(document).ready(() => {
+        updatePrice();
+    })
+</script>
+{% endblock %}

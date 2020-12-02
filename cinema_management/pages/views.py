@@ -1,11 +1,16 @@
 import datetime
+import json
 
 from auditorium.models import Auditorium
 from combo.models import Combo
 from django.contrib.auth import authenticate, login, logout
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from member.models import Member
 from movie.models import Movie
 from movie_schedule.models import MovieSchedule
+from receipt.models import ComboDetail, Receipt, Ticket
+from staff.models import Staff
 
 
 # Create your views here
@@ -44,7 +49,7 @@ def admin_movie(request):
         "GENRES_MAP": Movie.GENRES_MAP,
         "RATE_MAP": Movie.RATE_MAP,
     }
-    return render(request, 'movie/admin.html', context)
+    return render(request, 'admin/movie.html', context)
 
 def admin_auditorium(request):
     if not request.user.is_superuser:
@@ -52,7 +57,7 @@ def admin_auditorium(request):
     context = {
         "TYPE_MAP": Auditorium.TYPE_MAP,
     }
-    return render(request, 'auditorium/admin.html', context)
+    return render(request, 'admin/auditorium.html', context)
 
 def admin_schedule(request):
     if not request.user.is_superuser:
@@ -66,22 +71,22 @@ def admin_schedule(request):
         "auditoriums": auditoriums,
         "TYPE_MAP": Auditorium.TYPE_MAP,
     }
-    return render(request, 'schedule/admin.html', context)
+    return render(request, 'admin/schedule.html', context)
 
 def admin_member(request):
     if not request.user.is_superuser:
         return redirect('login')
-    return render(request, 'member/admin.html')
+    return render(request, 'admin/member.html')
 
 def admin_staff(request):
     if not request.user.is_superuser:
         return redirect('login')
-    return render(request, 'staff/admin.html')
+    return render(request, 'admin/staff.html')
 
 def admin_combo(request):
     if not request.user.is_superuser:
         return redirect('login')
-    return render(request, 'combo/admin.html')
+    return render(request, 'admin/combo.html')
 
 def movie(request):
     if not request.user.is_authenticated:
@@ -94,7 +99,7 @@ def movie(request):
         "GENRES_MAP": Movie.GENRES_MAP,
         "RATE_MAP": Movie.RATE_MAP,
     }
-    return render(request, 'movie/index.html', context)
+    return render(request, 'staff/movie-list.html', context)
 
 
 def movie_detail(request, id):
@@ -112,7 +117,7 @@ def movie_detail(request, id):
         "GENRES_MAP": Movie.GENRES_MAP,
         "RATE_MAP": Movie.RATE_MAP,
     }
-    return render(request, 'movie/detail.html', context)
+    return render(request, 'staff/movie-detail.html', context)
 
 def booking_seats(request, id):
     if not request.user.is_authenticated:
@@ -123,7 +128,7 @@ def booking_seats(request, id):
         "schedule": schedule,
         "rows": rows,
     }
-    return render(request, 'schedule/index.html', context)
+    return render(request, 'staff/book-seat.html', context)
 
 def booking_combos(request, id):
     if not request.user.is_authenticated:
@@ -131,7 +136,7 @@ def booking_combos(request, id):
     if request.method == "POST":
         if request.POST.get("seats") != "":
             seats = request.POST.get("seats")
-            price = request.POST.get("price")
+            seats = json.loads(seats)
             schedule = MovieSchedule.objects.get(id=id)
             combos = Combo.objects.all()
             combos = [combo.serialize() for combo in combos]
@@ -139,23 +144,24 @@ def booking_combos(request, id):
                 "schedule": schedule,
                 "seats": seats,
                 "combos": combos,
-                "price": price,
             }
-            return render(request, 'combo/index.html', context)
+            return render(request, 'staff/book-combo.html', context)
         return redirect(booking_seats, id)
 
-def booking_confirm(request, id):
+def booking_check(request, id):
     if not request.user.is_authenticated:
         return redirect('login')
     if request.method == "POST":
         if request.POST.get("seats") != "":
             seats = request.POST.get("seats")
+            seats = json.loads(seats)
             combos = request.POST.get("combos")
+            combos = json.loads(combos)
             schedule = MovieSchedule.objects.get(id=id)
             context = {
                 "schedule": schedule,
                 "seats": seats,
                 "combos": combos,
             }
-            return render(request, 'combo/index.html', context)
+            return render(request, 'staff/book-check.html', context)
         return redirect(booking_seats, id)

@@ -20,11 +20,12 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('', include('pages.urls')),
-    # path('admin/', admin.site.urls),
+    path('root/', admin.site.urls),
     path('api/v1/movie/', include('movie.urls')),
     path('api/v1/combo/', include('combo.urls')),
     path('api/v1/auditorium/', include('auditorium.urls')),
     path('api/v1/schedule/', include('movie_schedule.urls')),
     path('api/v1/member/', include('member.urls')),
     path('api/v1/staff/', include('staff.urls')),
+    path('api/v1/receipt/', include('receipt.urls')),
 ] + static(settings.STATIC_URL)

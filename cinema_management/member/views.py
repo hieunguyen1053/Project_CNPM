@@ -25,7 +25,6 @@ def all(request):
 
 def create(request):
     if request.method == "POST":
-        print(request.POST.get("birthday"))
         try:
             Member.objects.create(
                 id = Member.generate_id(),
@@ -69,3 +68,12 @@ def delete(request, id):
             return JsonResponse({"message": "Đã xoá lịch chiếu thành công."})
         except Exception as e:
             return JsonResponse({"error": "Đã có lỗi xảy ra."})
+
+def verify(request):
+    if request.method == "POST":
+        member = request.POST.get("member")
+        secret = request.POST.get("secret")
+        if len(Member.objects.filter(id=member, secret=secret)) != 0:
+            return JsonResponse({"message": "Xác nhận thành công."})
+        else:
+            return JsonResponse({"message": "Hội viên không tồn tại"})

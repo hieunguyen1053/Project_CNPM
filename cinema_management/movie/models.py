@@ -101,7 +101,7 @@ class Movie(models.Model):
         return self.RATE_MAP[self.rate]
 
     def get_schedule(self):
-        schedules = self.movie_schedule.all()
+        schedules = self.objects.all()
         schedules = [schedule.serialize() for schedule in schedules]
 
         date = {}

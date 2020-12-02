@@ -7,4 +7,5 @@ urlpatterns = [
     path('<int:id>', views.get, name='api-member-detail'),
     path('<int:id>/edit', views.edit, name='api-member-edit'),
     path('<int:id>/delete', views.delete, name='api-member-delete'),
+    path('verify', views.verify, name='api-member-verify'),
 ]
