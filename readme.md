@@ -2,7 +2,7 @@ Tải project về
 
 `git clone https://github.com/hieunguyen1053/Project_CNPM`
 
-Cài frameword django
+Cài framework django
 
 `pip install django`
 
