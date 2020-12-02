@@ -19,14 +19,40 @@ class Receipt(models.Model):
         verbose_name_plural = "Biên lai"
 
     def serialize(self):
+        tickets = Ticket.objects.filter(receipt=self)
+        combos = ComboDetail.objects.filter(receipt=self)
+        movie = tickets[0].schedule.movie
+        auditorium = tickets[0].schedule.auditorium
+
+        tickets = [ticket.serialize() for ticket in tickets]
+        combos = [combo.serialize() for combo in combos]
+
+
         return {
             "id": self.id,
-            "member": self.member,
-            "staff": self.staff,
+            "movie": movie.serialize(),
+            "member": self.member.serialize(),
+            "staff": self.staff.serialize(),
             "date": self.date,
-            "tickets": [],
-            "combos": [],
+            "auditorium": auditorium.serialize(),
+            "tickets": tickets,
+            "combos": combos,
+            "tickets_price": self.get_tickets_price(),
+            "combos_price": self.get_combos_price(),
+            "price": self.get_tickets_price() + self.get_combos_price(),
         }
+
+    def get_tickets_price(self):
+        tickets = Ticket.objects.filter(receipt=self)
+        tickets_price = tickets[0].schedule.price * len(tickets)
+        return tickets_price
+
+
+    def get_combos_price(self):
+        combos = ComboDetail.objects.filter(receipt=self)
+        combos_price = sum([combo.combo.price * combo.amount for combo in combos])
+        return combos_price
+
 
     # def get_absolute_url(self):
     #     return reverse('movie-detail', args=[str(self.id)])
@@ -37,6 +63,11 @@ class ComboDetail(models.Model):
     amount  = models.IntegerField()
     receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE)
 
+    def serialize(self):
+        return {
+            "combo"  : self.combo.serialize(),
+            "amount" : self.amount,
+        }
 
 # Create your models here.
 class Ticket(models.Model):
@@ -54,10 +85,9 @@ class Ticket(models.Model):
     def serialize(self):
         return {
             "id"       : self.id,
-            "schedule" : self.schedule,
-            "member"   : self.member,
-            "seat"     : self.seat,
-            # "url"          : self.get_absolute_url(),
+            "schedule" : self.schedule.serialize(),
+            "member"   : self.member.serialize(),
+            "seat"     : self.get_seat(),
         }
 
     def get_seat(self):
