@@ -34,6 +34,7 @@ def create(request):
                 genres = Movie.generate_genres(request.POST.get("genre")),
                 release_date = request.POST.get("release_date"),
                 time = request.POST.get("time"),
+                image_url = request.POST.get("image_url"),
                 language = request.POST.get("language"),
                 rate = request.POST.get("rate"),
             )
@@ -62,13 +63,13 @@ def edit(request, id):
             movie.genres = Movie.generate_genres(request.POST.get("genre"))
             movie.release_date = request.POST.get("release_date")
             movie.time = request.POST.get("time")
+            movie.image_url = request.POST.get("image_url")
             movie.language = request.POST.get("language")
             movie.rate = request.POST.get("rate")
             movie.status = True if request.POST.get("status") == "true" else False
             movie.save()
             return JsonResponse({"message": "Đã chỉnh sửa phim thành công."})
         except Exception as e:
-            print(e)
             return JsonResponse({"error": "Đã có lỗi xảy ra."})
 
 def delete(request, id):

@@ -53,12 +53,21 @@ class MovieSchedule(models.Model):
         schedule_groups = {}
         for schedule in schedules:
             if schedule.date not in schedule_groups:
-                schedule_groups[schedule.date] = [schedule]
-            else:
-                schedule_groups[schedule.date].append(schedule)
+                schedule_groups[schedule.date] = []
+            schedule_groups[schedule.date].append(schedule)
 
-        for schedule_group in schedule_groups.values():
-            schedule_group.sort(key=lambda schedule: schedule.time)
+        for group in schedule_groups:
+            schedule_groups[group] = cls.group_by_auditorium(schedule_groups[group])
+        print(schedule_groups)
+        return schedule_groups
+
+    @classmethod
+    def group_by_auditorium(cls, schedules):
+        schedule_groups = {}
+        for schedule in schedules:
+            if schedule.auditorium not in schedule_groups:
+                schedule_groups[schedule.auditorium] = []
+            schedule_groups[schedule.auditorium].append(schedule)
         return schedule_groups
 
     def get_time(self):

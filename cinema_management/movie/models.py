@@ -12,7 +12,7 @@ class Movie(models.Model):
     GENRES_MAP = {
         1:   "Hành động",   #ACTION
         2:   "Phiêu lưu",   #ADVENTURE
-        4:   "Hoạt hình",   #ADVENTURE
+        4:   "Hoạt hình",   #ANIMATION
         8:   "Hài",         #COMEDY
         16:  "Tội phạm",    #CRIME
         32:  "Tâm lý",      #DRAMA
@@ -77,6 +77,7 @@ class Movie(models.Model):
             "release_date" : self.release_date,
             "time"         : self.time,
             "genre"        : self.get_genres(),
+            "image_url"    : self.image_url,
             "language"     : self.language,
             "rate"         : self.rate,
             "status"       : self.status,
@@ -91,7 +92,7 @@ class Movie(models.Model):
         return sum(genres)
 
     def get_genres(self):
-        binary = bin(self.genres)[2:]
+        binary = bin(self.genres)[-1:1:-1]
         return ", ".join([self.GENRES_MAP[2**i] for (i, x) in enumerate(binary) if x == "1"])
 
     def get_language(self):

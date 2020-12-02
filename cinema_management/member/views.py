@@ -2,6 +2,7 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 
 from .models import Member
+import json
 
 
 def all(request):
@@ -74,6 +75,6 @@ def verify(request):
         member = request.POST.get("member")
         secret = request.POST.get("secret")
         if len(Member.objects.filter(id=member, secret=secret)) != 0:
-            return JsonResponse({"message": "Xác nhận thành công."})
+            return JsonResponse({"message": True})
         else:
-            return JsonResponse({"message": "Hội viên không tồn tại"})
+            return JsonResponse({"message": False})
