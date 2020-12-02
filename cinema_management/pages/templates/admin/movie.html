@@ -67,7 +67,7 @@
                     </div>
                     <div class="form-group">
                         <label for="description" class="col-form-label">Nội dung:</label>
-                        <textarea rows="10" class="form-control" name="actor"></textarea>
+                        <textarea rows="10" class="form-control" name="description"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="genre" class="col-form-label">Thể loại:</label>
@@ -80,6 +80,10 @@
                     <div class="form-group">
                         <label for="time" class="col-form-label">Thời lượng:</label>
                         <input type="number" class="form-control" name="time">
+                    </div>
+                    <div class="form-group">
+                        <label for="image_url" class="col-form-label">Hình ảnh:</label>
+                        <input type="text" class="form-control" name="image_url">
                     </div>
                     <div class="form-group">
                         <label for="language" class="col-form-label">Ngôn ngữ:</label>
@@ -122,9 +126,9 @@
             $(".table tbody").append(
                 `<tr>
                     <td>${movie.id}</td>
-                    <td>${movie.time}</td>
                     <td>${movie.title}</td>
                     <td>${movie.genre}</td>
+                    <td>${movie.time}</td>
                     <td>${LANGUAGE_MAP[movie.language]}</td>
                     <td>${RATE_MAP[movie.rate]}</td>
                     <td>
@@ -150,6 +154,7 @@
         formdata.append("genre", $("textarea[name='genre']").val());
         formdata.append("release_date", $("input[name='release_date']").val());
         formdata.append("time", $("input[name='time']").val());
+        formdata.append("image_url", $("input[name='image_url']").val());
         formdata.append("language", $("select[name='language']").val());
         formdata.append("rate", $("select[name='rate']").val());
 
@@ -179,6 +184,7 @@
         $("textarea[name='genre']").val(result.movie.genre);
         $("input[name='release_date']").val(result.movie.release_date);
         $("input[name='time']").val(result.movie.time);
+        $("input[name='image_url']").val(result.movie.image_url);
         $("select[name='language']").val(result.movie.language);
         $("select[name='rate']").val(result.movie.rate);
     }
@@ -194,6 +200,7 @@
         formdata.append("genre", $("textarea[name='genre']").val());
         formdata.append("release_date", $("input[name='release_date']").val());
         formdata.append("time", $("input[name='time']").val());
+        formdata.append("image_url", $("input[name='image_url']").val());
         formdata.append("language", $("select[name='language']").val());
         formdata.append("rate", $("select[name='rate']").val());
 
