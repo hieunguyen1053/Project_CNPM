@@ -29,12 +29,12 @@ def all(request):
 def create(request):
     if request.method == "POST":
         try:
-            num_seats = int(request.POST.get("rows")) * int(request.POST.get("seats_per_row"))
 
             movie = request.POST.get("movie")
             movie = Movie.objects.get(id=movie)
             auditorium = request.POST.get("auditorium")
             auditorium = Auditorium.objects.get(id=auditorium)
+            num_seats = auditorium.rows * auditorium.seats_per_row
             listtime = request.POST.getlist("time")
             for time in listtime:
                 MovieSchedule.objects.create(
@@ -49,6 +49,7 @@ def create(request):
         except IntegrityError as e:
             return JsonResponse({"error": "Rạp chiếu đã tồn tại lịch chiếu"})
         except Exception as e:
+            print(e)
             return JsonResponse({"error": "Đã có lỗi xảy ra."})
 
 def get(request, id):

@@ -32,7 +32,7 @@ def create(request):
                 name = request.POST.get("name"),
                 type = request.POST.get("type"),
                 rows = request.POST.get("rows"),
-                seats_per_row = int(request.POST.get("seats_per_row")),
+                seats_per_row = request.POST.get("seats_per_row"),
             )
             return JsonResponse({"message": "Đã thêm rạp chiếu thành công."})
         except Exception as e:
