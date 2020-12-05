@@ -29,6 +29,7 @@ def create(request):
             Combo.objects.create(
                 name = request.POST.get("name"),
                 price = request.POST.get("price"),
+                image_url = request.POST.get("image_url"),
             )
             return JsonResponse({"message": "Đã thêm combo thành công."})
         except Exception as e:
@@ -49,6 +50,7 @@ def edit(request, id):
             combo = Combo.objects.get(id=id)
             combo.name = request.POST.get("name")
             combo.price = request.POST.get("price")
+            combo.image_url = request.POST.get("image_url")
             combo.save()
             return JsonResponse({"message": "Đã chỉnh sửa combo thành công."})
         except Exception as e:
