@@ -4,10 +4,8 @@
 {% block content %}
 {% load static %}
 <div class="container">
-    <input type="text" name="price_seats" hidden value="{{ seats|get_sum_price_seats }}">
-    <form class="form" action="/booking/{{ schedule.id }}/check" method="post">
+    <form class="form" action="/combo/check" method="post">
         {% csrf_token %}
-        <input type="text" name="seats" hidden value="{{ seats|to_json }}">
         <input type="text" name="combos" hidden>
     </form>
     <div class="row mt-5">
@@ -32,25 +30,9 @@
     <hr>
     <div class="container">
         <div class="row">
-            <div class="col-1">
-                <img class="img-fluid d-block mx-auto rounded mb-4 mb-lg-0" src="{{ schedule.movie.image_url }}" alt="">
+            <div class="col-7">
             </div>
             <div class="col-3">
-                <div>{{ schedule.movie.title }}</div>
-                <div>{{ schedule.auditorium.get_type }}</div>
-            </div>
-            <div class="col-3">
-                <div>Suất chiếu: {{ schedule.time }}, {{ schedule.date }}</div>
-                <div>Phòng chiếu: Cinema {{ schedule.auditorium.name }}</div>
-                <div>Ghế:
-                    {% for seat in seats %}
-                    {{ seat.name }}
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="col-3">
-                <div>Phim: <span class="price_seats"></span></div>
-                <div>Combo: <span class="price_combos"></span></div>
                 <div>Tổng: <span class="price_sum"></span></div>
             </div>
             <div class="col-2">
@@ -77,11 +59,7 @@
                 price_combos += $(element).val() * $(element).data("price")
             }
         })
-        var price_seats = Number.parseInt($("input[name='price_seats']").val());
-        var price_sum = price_seats + price_combos;
-        $(".price_combos").text(formater.format(price_combos));
-        $(".price_seats").text(formater.format(price_seats));
-        $(".price_sum").text(formater.format(price_sum));
+        $(".price_sum").text(formater.format(price_combos));
     }
 
     function updateCombos() {

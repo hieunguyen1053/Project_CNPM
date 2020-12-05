@@ -9,8 +9,6 @@
         <div class="col-8">
             <form action="" method="post">
                 {% csrf_token %}
-                <input type="text" name="schedule" hidden value="{{ schedule.id }}">
-                <input type="text" name="seats" hidden value="{{ seats|to_json }}">
                 <input type="text" name="combos" hidden value="{{ combos|to_json }}">
                 <div class="form-group">
                     <label for="member" class="col-form-label">Nhập mã thành viên:</label>
@@ -33,10 +31,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>{{ seats|length }} ghế</td>
-                            <td>{{ seats|get_sum_price_seats }}</td>
-                        </tr>
                         {% for combo in combos %}
                             <tr>
                                 <td>{{ combo.name }} x {{ combo.num }}</td>
@@ -53,26 +47,9 @@
     <hr>
     <div class="container">
         <div class="row">
-            <div class="col-1">
-                <img class="img-fluid d-block mx-auto rounded mb-4 mb-lg-0" src="{{ schedule.movie.image_url }}" alt="">
-            </div>
+            <div class="col-7"></div>
             <div class="col-3">
-                <div>{{ schedule.movie.title }}</div>
-                <div>{{ schedule.auditorium.get_type }}</div>
-            </div>
-            <div class="col-3">
-                <div>Suất chiếu: {{ schedule.time }}, {{ schedule.date }}</div>
-                <div>Phòng chiếu: Cinema {{ schedule.auditorium.name }}</div>
-                <div>Ghế:
-                    {% for seat in seats %}
-                    {{ seat.name }}
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="col-3">
-                <div>Phim: <span class="price_seats">{{ seats|get_sum_price_seats }}</span></div>
-                <div>Combo: <span class="price_combos">{{ combos|get_sum_price_combos }}</span></div>
-                <div>Tổng: <span class="price_sum"></span></div>
+                <div>Tổng: <span class="price_sum">{{ combos|get_sum_price_combos }}</span></div>
             </div>
             <div class="col-2">
                 <button type="button" class="btn btn-primary" id="create">Xác nhận</button>
@@ -83,23 +60,17 @@
 <script>
     function updatePrice() {
         const formater = new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' });
-        var price_seats = Number.parseInt($(".price_seats").text());
-        var price_combos = Number.parseInt($(".price_combos").text());
-        var price_sum = price_seats + price_combos;
-        $(".price_combos").text(formater.format(price_combos));
-        $(".price_seats").text(formater.format(price_seats));
+        var price_sum = Number.parseInt($(".price_sum").text());
         $(".price_sum").text(formater.format(price_sum));
     }
 
     async function create() {
         var formdata = new FormData();
         formdata.append("csrfmiddlewaretoken", $("input[name='csrfmiddlewaretoken']").val());
-        formdata.append("schedule", $("input[name='schedule']").val());
         formdata.append("member", $("input[name='member']").val());
-        formdata.append("seats", $("input[name='seats']").val());
         formdata.append("combos", $("input[name='combos']").val());
 
-        const response = await fetch("/api/v1/receipt/create", { method: 'POST', body: formdata });
+        const response = await fetch("/api/v1/receipt/create1", { method: 'POST', body: formdata });
         const result = await response.json();
         if (result.message) {
             alert(result.message);
