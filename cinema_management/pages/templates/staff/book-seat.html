@@ -15,32 +15,38 @@
         {% for row in rows %}
         <div class="row m-1 justify-content-center">
             {% for seat in row %}
-            <div class="seat border{% if seat.status == '1' %} seat-occupied{% endif %}" data-price="{{ schedule.price }}" data-id="{{ seat.id }}" data-name="{{ seat.name }}">{{ seat.name }}</div>
+            <div class="seat border{% if seat.status == '1' %} seat-occupied{% endif %}"
+                data-price="{{ schedule.price }}" data-id="{{ seat.id }}" data-name="{{ seat.name }}">{{ seat.name }}
+            </div>
             {% endfor %}
         </div>
         {% endfor %}
     </div>
+</div>
+<div class="w-100 pb-5" style="position:absolute;bottom:0;">
     <hr>
-    <div class="row">
-        <div class="col-lg-1">
-            <img class="img-fluid d-block mx-auto rounded mb-4 mb-lg-0" src="{{ schedule.movie.image_url }}" alt="">
-        </div>
-        <div class="col-lg-3">
-            <div>{{ schedule.movie.title }}</div>
-            <div>{{ schedule.auditorium.get_type }}</div>
-        </div>
-        <div class="col-lg-3">
-            <div>Suất chiếu: {{ schedule.time }}, {{ schedule.date }}</div>
-            <div>Phòng chiếu: Cinema {{ schedule.auditorium.name }}</div>
-            <div>Ghế: <span class="seats"></span></div>
-        </div>
-        <div class="col-lg-3">
-            <div>Phim: <span class="price_seats"></span></div>
-            <div>Combo: <span class="price_combos"></span></div>
-            <div>Tổng: <span class="price_sum"></span></div>
-        </div>
-        <div class="col-lg-2">
-            <button type="button" class="btn btn-primary" id="next">Tiếp tục</button>
+    <div class="container">
+        <div class="row">
+            <div class="col-1">
+                <img class="img-fluid d-block mx-auto rounded mb-4 mb-lg-0" src="{{ schedule.movie.image_url }}" alt="">
+            </div>
+            <div class="col-3">
+                <div>{{ schedule.movie.title }}</div>
+                <div>{{ schedule.auditorium.get_type }}</div>
+            </div>
+            <div class="col-3">
+                <div>Suất chiếu: {{ schedule.time }}, {{ schedule.date }}</div>
+                <div>Phòng chiếu: Cinema {{ schedule.auditorium.name }}</div>
+                <div>Ghế: <span class="seats"></span></div>
+            </div>
+            <div class="col-3">
+                <div>Phim: <span class="price_seats"></span></div>
+                <div>Combo: <span class="price_combos"></span></div>
+                <div>Tổng: <span class="price_sum"></span></div>
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn btn-primary" id="next">Tiếp tục</button>
+            </div>
         </div>
     </div>
 </div>

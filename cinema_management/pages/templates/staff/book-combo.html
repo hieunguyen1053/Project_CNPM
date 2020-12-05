@@ -15,42 +15,47 @@
         <div class="col-6">
             <div class="row">
                 <div class="col-3">
-                    <img class="img-fluid d-block mx-auto rounded mb-4 mb-lg-0" src="{{ schedule.movie.image_url }}" alt="">
+                    <img class="img-fluid d-block mx-auto rounded mb-4 mb-lg-0" src="{{ combo.image_url }}" alt="">
                 </div>
                 <div class="col-9">
                     <p><b>{{ combo.name }}</b></p>
                     <p>Giá: {{ combo.price }}</p>
-                    <input type="number" class="combo" data-id="{{ combo.id }}" data-price="{{ combo.price }}" style="width: 50px;" value="0" min="0">
+                    <input type="number" class="combo" data-id="{{ combo.id }}" data-price="{{ combo.price }}" data-name="{{ combo.name }}"
+                        style="width: 50px;" value="0" min="0">
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
+</div>
+<div class="w-100 pb-5" style="position:absolute;bottom:0;">
     <hr>
-    <div class="row">
-        <div class="col-lg-1">
-            <img class="img-fluid d-block mx-auto rounded mb-4 mb-lg-0" src="{{ schedule.movie.image_url }}" alt="">
-        </div>
-        <div class="col-lg-3">
-            <div>{{ schedule.movie.title }}</div>
-            <div>{{ schedule.auditorium.get_type }}</div>
-        </div>
-        <div class="col-lg-3">
-            <div>Suất chiếu: {{ schedule.time }}, {{ schedule.date }}</div>
-            <div>Phòng chiếu: Cinema {{ schedule.auditorium.name }}</div>
-            <div>Ghế:
-                {% for seat in seats %}
-                {{ seat.name }}
-                {% endfor %}
+    <div class="container">
+        <div class="row">
+            <div class="col-1">
+                <img class="img-fluid d-block mx-auto rounded mb-4 mb-lg-0" src="{{ schedule.movie.image_url }}" alt="">
             </div>
-        </div>
-        <div class="col-lg-3">
-            <div>Phim: <span class="price_seats"></span></div>
-            <div>Combo: <span class="price_combos"></span></div>
-            <div>Tổng: <span class="price_sum"></span></div>
-        </div>
-        <div class="col-lg-2">
-            <button type="button" class="btn btn-primary" id="next">Tiếp tục</button>
+            <div class="col-3">
+                <div>{{ schedule.movie.title }}</div>
+                <div>{{ schedule.auditorium.get_type }}</div>
+            </div>
+            <div class="col-3">
+                <div>Suất chiếu: {{ schedule.time }}, {{ schedule.date }}</div>
+                <div>Phòng chiếu: Cinema {{ schedule.auditorium.name }}</div>
+                <div>Ghế:
+                    {% for seat in seats %}
+                    {{ seat.name }}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-3">
+                <div>Phim: <span class="price_seats"></span></div>
+                <div>Combo: <span class="price_combos"></span></div>
+                <div>Tổng: <span class="price_sum"></span></div>
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn btn-primary" id="next">Tiếp tục</button>
+            </div>
         </div>
     </div>
 </div>
@@ -74,9 +79,9 @@
         })
         var price_seats = Number.parseInt($("input[name='price_seats']").val());
         var price_sum = price_seats + price_combos;
-        $(".price_combos").text("Combo: " + formater.format(price_combos));
-        $(".price_seats").text("Phim: " + formater.format(price_seats));
-        $(".price_sum").text("Tổng: " + formater.format(price_sum));
+        $(".price_combos").text(formater.format(price_combos));
+        $(".price_seats").text(formater.format(price_seats));
+        $(".price_sum").text(formater.format(price_sum));
     }
 
     function updateCombos() {
@@ -86,8 +91,10 @@
             if ($(element).val() != 0) {
                 combo_objs.push({
                     "id": $(element).data("id"),
+                    "name": $(element).data("name"),
                     "price": $(element).data("price"),
                     "num": Number.parseInt($(element).val()),
+                    "sum_price": Number.parseInt($(element).val()) * $(element).data("price"),
                 })
             }
         })

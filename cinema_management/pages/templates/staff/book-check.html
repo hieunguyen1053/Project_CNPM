@@ -5,47 +5,78 @@
 {% load static %}
 <div class="container">
     <h3 class="mt-5">Xác nhận</h3>
-    <form action="" method="post">
-        {% csrf_token %}
-        <input type="text" name="schedule" hidden value="{{ schedule.id }}">
-        <input type="text" name="seats" hidden value="{{ seats|to_json }}">
-        <input type="text" name="combos" hidden value="{{ combos|to_json }}">
-        <div class="form-group">
-            <label for="member" class="col-form-label">Nhập mã thành viên:</label>
-            <input type="text" name="member">
-        </div>
-        <div class="form-group">
-            <label for="secret" class="col-form-label">Nhập mã bí mật:</label>
-            <input type="text" name="secret">
-            <span class="verify text-success">Xác nhận thành công</span>
-            <span class="verify text-danger">Xác nhận thất bại</span>
-        </div>
-    </form>
-    <hr>
     <div class="row">
-        <div class="col-lg-1">
-            <img class="img-fluid d-block mx-auto rounded mb-4 mb-lg-0" src="{{ schedule.movie.image_url }}" alt="">
+        <div class="col-8">
+            <form action="" method="post">
+                {% csrf_token %}
+                <input type="text" name="schedule" hidden value="{{ schedule.id }}">
+                <input type="text" name="seats" hidden value="{{ seats|to_json }}">
+                <input type="text" name="combos" hidden value="{{ combos|to_json }}">
+                <div class="form-group">
+                    <label for="member" class="col-form-label">Nhập mã thành viên:</label>
+                    <input type="text" name="member">
+                </div>
+                <div class="form-group">
+                    <label for="secret" class="col-form-label">Nhập mã bí mật:</label>
+                    <input type="text" name="secret">
+                    <span class="verify text-success">Xác nhận thành công</span>
+                    <span class="verify text-danger">Xác nhận thất bại</span>
+                </div>
+            </form>
         </div>
-        <div class="col-lg-3">
-            <div>{{ schedule.movie.title }}</div>
-            <div>{{ schedule.auditorium.get_type }}</div>
-        </div>
-        <div class="col-lg-3">
-            <div>Suất chiếu: {{ schedule.time }}, {{ schedule.date }}</div>
-            <div>Phòng chiếu: Cinema {{ schedule.auditorium.name }}</div>
-            <div>Ghế:
-                {% for seat in seats %}
-                {{ seat.name }}
-                {% endfor %}
+        <div class="col-4">
+            <div class="table-responsive">
+                <table class="table table-striped table-sm" style="text-align:center">
+                    <thead>
+                        <tr>
+                            <th colspan="2">Tổng cộng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ seats|length }} ghế</td>
+                            <td>{{ seats|get_sum_price_seats }}</td>
+                        </tr>
+                        {% for combo in combos %}
+                            <tr>
+                                <td>{{ combo.name }} x {{ combo.num }}</td>
+                                <td>{{ combo.sum_price }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div class="col-lg-3">
-            <div>Phim: <span class="price_seats">{{ seats|get_sum_price_seats }}</span></div>
-            <div>Combo: <span class="price_combos">{{ combos|get_sum_price_combos }}</span></div>
-            <div>Tổng: <span class="price_sum"></span></div>
-        </div>
-        <div class="col-lg-2">
-            <button type="button" class="btn btn-primary" id="create">Xác nhận</button>
+    </div>
+</div>
+<div class="w-100 pb-5" style="position:absolute;bottom:0;">
+    <hr>
+    <div class="container">
+        <div class="row">
+            <div class="col-1">
+                <img class="img-fluid d-block mx-auto rounded mb-4 mb-lg-0" src="{{ schedule.movie.image_url }}" alt="">
+            </div>
+            <div class="col-3">
+                <div>{{ schedule.movie.title }}</div>
+                <div>{{ schedule.auditorium.get_type }}</div>
+            </div>
+            <div class="col-3">
+                <div>Suất chiếu: {{ schedule.time }}, {{ schedule.date }}</div>
+                <div>Phòng chiếu: Cinema {{ schedule.auditorium.name }}</div>
+                <div>Ghế:
+                    {% for seat in seats %}
+                    {{ seat.name }}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-3">
+                <div>Phim: <span class="price_seats">{{ seats|get_sum_price_seats }}</span></div>
+                <div>Combo: <span class="price_combos">{{ combos|get_sum_price_combos }}</span></div>
+                <div>Tổng: <span class="price_sum"></span></div>
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn btn-primary" id="create">Xác nhận</button>
+            </div>
         </div>
     </div>
 </div>
