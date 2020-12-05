@@ -14,8 +14,8 @@ from staff.models import Staff
 
 
 # Create your views here
-def home(request):
-    return render(request, 'home/index.html')
+def dashboard(request):
+    return render(request, 'admin/dashboard.html')
 
 def login_view(request):
     if request.method == "GET":
