@@ -51,6 +51,10 @@
                         <input type="text" class="form-control" name="name">
                     </div>
                     <div class="form-group">
+                        <label for="image_url" class="col-form-label">Hình ảnh:</label>
+                        <input type="text" class="form-control" name="image_url">
+                    </div>
+                    <div class="form-group">
                         <label for="price" class="col-form-label">Giá:</label>
                         <input type="number" class="form-control" name="price" min="60000.00" max="500000.00"
                             step="10000.00">
@@ -96,6 +100,7 @@
         var formdata = new FormData();
         formdata.append("csrfmiddlewaretoken", $("input[name='csrfmiddlewaretoken']").val());
         formdata.append("name", $("input[name='name']").val());
+        formdata.append("image_url", $("input[name='image_url']").val());
         formdata.append("price", $("input[name='price']").val());
 
         const response = await fetch("/api/v1/combo/create", { method: 'POST', body: formdata });
@@ -115,14 +120,16 @@
         const result = await response.json();
         $("input[name='id']").val(result.combo.id);
         $("input[name='name']").val(result.combo.name);
+        $("input[name='image_url']").val(result.combo.image_url);
         $("input[name='price']").val(result.combo.price);
     }
 
     async function edit(id) {
         var formdata = new FormData();
         formdata.append("csrfmiddlewaretoken", $("input[name='csrfmiddlewaretoken']").val());
-        $("input[name='name']").val(result.combo.name);
-        $("input[name='price']").val(result.combo.price);
+        formdata.append("name", $("input[name='name']").val());
+        formdata.append("image_url", $("input[name='image_url']").val());
+        formdata.append("price", $("input[name='price']").val());
 
         const response = await fetch("/api/v1/combo/" + id + "/edit", { method: 'POST', body: formdata });
         const result = await response.json();
