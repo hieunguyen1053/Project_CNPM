@@ -58,8 +58,11 @@ class MovieSchedule(models.Model):
 
         for group in schedule_groups:
             schedule_groups[group] = cls.group_by_auditorium(schedule_groups[group])
-        print(schedule_groups)
-        return schedule_groups
+
+        sort_schedule_groups = {}
+        for group in sorted(schedule_groups.keys()):
+            sort_schedule_groups[group] = schedule_groups[group]
+        return sort_schedule_groups
 
     @classmethod
     def group_by_auditorium(cls, schedules):
