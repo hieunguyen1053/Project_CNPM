@@ -15,7 +15,12 @@ from staff.models import Staff
 
 # Create your views here
 def dashboard(request):
-    return render(request, 'admin/dashboard.html')
+    if not request.user.is_superuser:
+        return redirect('login')
+    context = {
+        "TYPE_MAP": Auditorium.TYPE_MAP,
+    }
+    return render(request, 'admin/receipt.html', context)
 
 def login_view(request):
     if request.method == "GET":
@@ -173,3 +178,30 @@ def booking_check(request, id):
             }
             return render(request, 'staff/book-check.html', context)
         return redirect(booking_seats, id)
+
+def add_member(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    return render(request, 'staff/add-member.html')
+
+def combo_list(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    combos = Combo.objects.all()
+    combos = [combo.serialize() for combo in combos]
+    context = {
+        "combos": combos,
+    }
+    return render(request, 'staff/combo-list.html', context)
+
+def combo_check(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    if request.method == "POST":
+        combos = request.POST.get("combos")
+        combos = json.loads(combos)
+        context = {
+            "combos": combos,
+        }
+        return render(request, 'staff/combo-check.html', context)
+    return redirect('combo_list')
