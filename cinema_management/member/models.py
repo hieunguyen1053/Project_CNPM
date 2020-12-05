@@ -7,6 +7,7 @@ class Member(models.Model):
     full_name = models.CharField(max_length=50)
     id_card   = models.CharField(max_length=12)
     birthday  = models.DateField()
+    create_day  = models.DateField(auto_now=True)
     is_vip    = models.BooleanField(default=False)
 
 
@@ -17,10 +18,12 @@ class Member(models.Model):
     def serialize(self):
         return {
             "id"         : self.id,
+            "secret"     : self.secret,
             "full_name"  : self.full_name,
             "id_card"    : self.id_card,
             "birthday"   : self.birthday,
             "is_vip"     : self.is_vip,
+            "create_day" : self.create_day,
             # "url"          : self.get_absolute_url(),
         }
 
