@@ -17,6 +17,7 @@
                 <th>Tên thành viên</th>
                 <th>CMND</th>
                 <th>Sinh nhật</th>
+                <th>Ngày tạo</th>
                 <th>VIP</th>
                 <th>Thao tác</th>
             </tr>
@@ -36,7 +37,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Thông tin lịch chiếu</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Thông tin thành viên</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -66,6 +67,10 @@
                         <label for="birthday" class="col-form-label">Sinh nhật:</label>
                         <input type="date" class="form-control" name="birthday">
                     </div>
+                    <div class="form-group">
+                        <label for="secret" class="col-form-label">Secret:</label>
+                        <input type="text" class="form-control" name="secret">
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -91,6 +96,7 @@
                     <td>${member.full_name}</td>
                     <td>${member.id_card}</td>
                     <td>${member.birthday}</td>
+                    <td>${member.create_day}</td>
                     <td>${member.is_vip}</td>
                     <td>
                         <a class="edit" data-id="${member.id}">Sửa</a>|
@@ -135,6 +141,7 @@
         $("input[name='full_name']").val(result.member.full_name);
         $("input[name='id_card']").val(result.member.id_card);
         $("input[name='birthday']").val(result.member.birthday);
+        $("input[name='secret']").val(result.member.secret);
     }
 
     async function edit(id) {
@@ -190,6 +197,7 @@
         $(".create").unbind('click').bind('click', (e) => {
             $('.form-control').val("");
             $("input[name='id']").parent().hide();
+            $("input[name='secret']").parent().hide();
             $('#memberModal').modal('show');
             $('#create').show();
             $('#edit').hide();
@@ -198,6 +206,7 @@
 
         $(".edit").unbind('click').bind('click', (e) => {
             $("input[name='id']").parent().show();
+            $("input[name='secret']").parent().show();
             get($(e.target).data("id"));
             $('#memberModal').modal('show');
             $('#create').hide();
