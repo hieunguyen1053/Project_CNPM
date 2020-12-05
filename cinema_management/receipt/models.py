@@ -21,26 +21,44 @@ class Receipt(models.Model):
     def serialize(self):
         tickets = Ticket.objects.filter(receipt=self)
         combos = ComboDetail.objects.filter(receipt=self)
-        movie = tickets[0].schedule.movie
-        auditorium = tickets[0].schedule.auditorium
 
-        tickets = [ticket.serialize() for ticket in tickets]
-        combos = [combo.serialize() for combo in combos]
+        if len(tickets) != 0:
+            movie = tickets[0].schedule.movie
+            auditorium = tickets[0].schedule.auditorium
+
+            tickets = [ticket.serialize() for ticket in tickets]
+            combos = [combo.serialize() for combo in combos]
 
 
-        return {
-            "id": self.id,
-            "movie": movie.serialize(),
-            "member": self.member.serialize(),
-            "staff": self.staff.serialize(),
-            "date": self.date,
-            "auditorium": auditorium.serialize(),
-            "tickets": tickets,
-            "combos": combos,
-            "tickets_price": self.get_tickets_price(),
-            "combos_price": self.get_combos_price(),
-            "price": self.get_tickets_price() + self.get_combos_price(),
-        }
+            return {
+                "id": self.id,
+                "movie": movie.serialize(),
+                "member": self.member.serialize(),
+                "staff": self.staff.serialize(),
+                "date": self.date,
+                "auditorium": auditorium.serialize(),
+                "tickets": tickets,
+                "combos": combos,
+                "tickets_price": self.get_tickets_price(),
+                "combos_price": self.get_combos_price(),
+                "price": self.get_tickets_price() + self.get_combos_price(),
+            }
+        else:
+            combos = [combo.serialize() for combo in combos]
+
+            return {
+                "id": self.id,
+                "movie": "",
+                "member": self.member.serialize(),
+                "staff": self.staff.serialize(),
+                "date": self.date,
+                "auditorium": "",
+                "tickets": "",
+                "combos": combos,
+                "tickets_price": "",
+                "combos_price": self.get_combos_price(),
+                "price": self.get_combos_price(),
+            }
 
     def get_tickets_price(self):
         tickets = Ticket.objects.filter(receipt=self)

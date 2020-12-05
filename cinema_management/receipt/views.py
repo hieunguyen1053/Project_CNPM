@@ -80,6 +80,33 @@ def create(request):
         except Exception as e:
             return JsonResponse({"error": "Đã có lỗi xảy ra."})
 
+def create1(request):
+    if request.method == "POST":
+        try:
+            _staff = request.user.id
+            staff = Staff.objects.get(id=_staff)
+
+            _member = request.POST.get("member")
+            member = Member.objects.get(id=_member)
+
+            receipt = Receipt.objects.create(
+                member = member,
+                staff = staff,
+            )
+
+            _combos = request.POST.get("combos")
+            _combos = json.loads(_combos)
+            for _combo in _combos:
+                combo = Combo.objects.get(id=_combo.get("id"))
+                combo_detail = ComboDetail.objects.create(
+                    combo = combo,
+                    amount = _combo.get("num"),
+                    receipt = receipt,
+                )
+            return JsonResponse({"message": "Đã đặt thành công."})
+        except Exception as e:
+            return JsonResponse({"error": "Đã có lỗi xảy ra."})
+
 def delete(request, id):
     if request.method == "GET":
         try:
